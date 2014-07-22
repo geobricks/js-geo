@@ -1,6 +1,6 @@
 require.config({
 
-    baseUrl: 'js',
+    baseUrl: 'js/libs',
 
     paths: {
         'bootstrap'     :   '//netdna.bootstrapcdn.com/bootstrap/3.0.1/js/bootstrap.min',
@@ -24,33 +24,23 @@ require.config({
                 });
             }
         },
-        'bootstrap': {
-            deps: ['jquery']
-        },
-        chosen: {
-            deps: ['jquery']
-        },
-        underscore: {
-            deps: ['jquery']
-        },
-        highcharts: {
-            deps: ['jquery']
-        }
+        bootstrap: ['jquery'],
+        chosen: ['jquery'],
+        highcharts: ['jquery'],
+        underscore: ['jquery']
     }
 
 });
 
-require(['jquery', 'mustache', 'bootstrap', 'jquery.i18n', 'chosen', 'highcharts'], function($, Mustache) {
+require(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'jquery.i18n', 'chosen', 'highcharts'], function($, Mustache, templates) {
 
-    $.get('html/templates.html', function (templates) {
-        var template = $(templates).filter('#header').html();
-        var view = {
-            company: 'GeoBricks',
-            browse: 'Browse',
-            download: 'Download'
-        };
-        var render = Mustache.render(template, view);
-        $('#js_geo_placeholder').append(render);
-    });
+    var template = $(templates).filter('#structure').html();
+    var view = {
+        company: 'GeoBricks',
+        browse: 'Browse',
+        download: 'Download'
+    };
+    var render = Mustache.render(template, view);
+    $('#js_geo_placeholder').append(render);
 
 });
