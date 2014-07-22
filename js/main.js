@@ -1,14 +1,14 @@
 require.config({
 
-    baseUrl: 'js/libs',
+    baseUrl: 'js',
 
     paths: {
-        'jquery': '//code.jquery.com/jquery-1.10.1.min',
-        'jquery.i18n': '//fenixapps.fao.org/repository/js/jquery/1.0.9/jquery.i18n.properties-min',
-        'bootstrap': '//netdna.bootstrapcdn.com/bootstrap/3.0.1/js/bootstrap.min',
-        'chosen': '//fenixapps.fao.org/repository/js/chosen/1.0.0/chosen.jquery.min',
-        'underscore': '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min',
-        'highcharts': '//code.highcharts.com/highcharts'
+        'bootstrap'     :   '//netdna.bootstrapcdn.com/bootstrap/3.0.1/js/bootstrap.min',
+        'chosen'        :   '//fenixapps.fao.org/repository/js/chosen/1.0.0/chosen.jquery.min',
+        'highcharts'    :   '//code.highcharts.com/highcharts',
+        'jquery'        :   '//code.jquery.com/jquery-1.10.1.min',
+        'jquery.i18n'   :   '//fenixapps.fao.org/repository/js/jquery/1.0.9/jquery.i18n.properties-min',
+        'underscore'    :   '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min'
     },
 
     shim: {
