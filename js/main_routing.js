@@ -53,11 +53,11 @@ require(['jquery','backbone', 'i18n', 'loglevel', 'domReady!'], function ($, Bac
             log.info("home");
 
             require(
-//                {locale: 'it-IT'},
-                ["i18n!../../I18N/str"], function (i18n) {
+                {locale: 'it-IT'},
+                ["i18n!nls/speak"], function (i18n) {
                  log.info("home2");
                 log.info(i18n);
-                log.info(i18n.welcome);
+                log.info(i18n.header);
             });
 
         },
