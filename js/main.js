@@ -8,7 +8,7 @@ require.config({
         'highcharts'    :   '//code.highcharts.com/highcharts',
         'jquery'        :   '//code.jquery.com/jquery-1.10.1.min',
         'jquery.i18n'   :   '//fenixapps.fao.org/repository/js/jquery/1.0.9/jquery.i18n.properties-min',
-        'underscore'    :   '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min'
+        'mustache'      :   '//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache'
     },
 
     shim: {
@@ -40,6 +40,17 @@ require.config({
 
 });
 
-require(['jquery', 'bootstrap', 'jquery.i18n', 'chosen', 'underscore', 'highcharts'], function($) {
-    console.log('jQuery version:', $.fn.jquery);
+require(['jquery', 'mustache', 'bootstrap', 'jquery.i18n', 'chosen', 'highcharts'], function($, Mustache) {
+
+    $.get('html/templates.html', function (templates) {
+        var template = $(templates).filter('#header').html();
+        var view = {
+            company: 'GeoBricks',
+            browse: 'Browse',
+            download: 'Download'
+        };
+        var render = Mustache.render(template, view);
+        $('#js_geo_placeholder').append(render);
+    });
+
 });
