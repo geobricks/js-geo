@@ -18,7 +18,14 @@ require.config({
 
 });
 
-require({locale: 'it-IT'}, ['jquery', 'mustache', 'text!../../html/templates.html', 'i18n!nls/speak', 'bootstrap', 'chosen', 'highcharts'], function($, Mustache, templates, speak) {
+require({locale: 'it-IT'},
+        ['jquery',
+         'mustache',
+         'text!../../html/templates.html',
+         'i18n!nls/speak',
+         'bootstrap',
+         'chosen',
+         'highcharts'], function($, Mustache, templates, speak) {
 
     var template = $(templates).filter('#structure').html();
     var view = {
