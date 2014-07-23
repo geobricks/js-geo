@@ -12,6 +12,7 @@ require.config({
         mustache    :   '//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache',
         navbar      :   '../navbar/geobricks_navbar',
         browse      :   '../browse/geobricks_browse',
+        download      :   '../download/geobricks_download',
         underscore  :   '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min'
     },
 
@@ -37,10 +38,11 @@ require(['jquery',
          'navbar',
          'browse',
          'loglevel',
+         'download',
          'bootstrap',
          'chosen',
          'highcharts',
-         'domReady!'], function($, Mustache, templates, Backbone, navbar_def, browse_def, log) {
+         'domReady!'], function($, Mustache, templates, Backbone, navbar_def, browse, log) {
 
     log.setLevel(0);
 
@@ -57,6 +59,8 @@ require(['jquery',
             '(/)home(/)': 'home',
             '(/)browse(/):lang': 'browse',
             '(/)browse(/)': 'browse',
+            '(/)download(/):lang': 'download',
+            '(/)download(/)': 'download',
             '': 'home'
         },
 
@@ -67,8 +71,11 @@ require(['jquery',
 
         browse: function (lang) {
             this._init(lang);
-            var browse = new browse_def(lang);
-            browse.build_navbar();
+            browse.build({lang: lang});
+        },
+
+        download: function(lang) {
+            var chart = new FMChartScatter()
         },
 
         _init: function (lang) {

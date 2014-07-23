@@ -59,7 +59,7 @@ require(
         home: function(lang) {
             this._init(lang);
             require(["i18n!nls/speak"], function (i18n) {
-                 log.info("home2");
+                log.info("home2");
                 log.info(i18n);
                 log.info(i18n.header);
             });

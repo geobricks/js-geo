@@ -3,33 +3,29 @@ define(['jquery',
     'text!../../html/templates.html',
     'bootstrap'], function ($, Mustache, templates) {
 
-    var returnedModule = function (lang) {
+        var CONFIG = {
+            lang: 'en',
+            placeholder: 'main_content_placeholder',
+            template_id: 'navbar'
+        }
 
-        require.config({"locale" : lang});
+        var build = function(config) {
+            CONFIG = $.extend(true, {}, CONFIG, config);
 
-        var _name = 'Module: Browse';
+            require(['i18n!nls/translate'], function (translate) {
+                var template = $(templates).filter('#' + CONFIG.template_id).html();
+                var view = {
+                    company: translate.company,
+                    browse: translate.browse,
+                    download: translate.download
+                };
+                var render = Mustache.render(template, view);
+                $('#' + CONFIG.placeholder).html("browse");
+            });
+        }
 
-        this.getName = function () {
-            return _name;
+        // public instance methods
+        return {
+            build: build
         };
-
-        this.build_navbar = function() {
-            require(
-                ['i18n!nls/translate'], function (translate) {
-                    var template = $(templates).filter('#navbar').html();
-                    var view = {
-                        company: translate.company,
-                        browse: translate.browse,
-                        download: translate.download
-                    };
-                    var render = Mustache.render(template, view);
-                    $('#main_content_placeholder').html(_name);
-                });
-
-        };
-
-    };
-
-    return returnedModule;
-
 });
