@@ -1,14 +1,20 @@
 define(['jquery',
-    'mustache',
-    'text!../../html/templates.html',
-    'bootstrap'], function ($, Mustache, templates) {
+        'mustache',
+        'text!../../html/templates.html',
+        'bootstrap'], function ($, Mustache, templates) {
 
     var returnedModule = function (lang) {
 
         console.log('lang? ' + lang);
         require.config({"locale" : lang});
 
-        var _name = 'Module: Browse';
+        var CONFIG = {
+
+        }
+
+
+
+        var _name = 'Module: Navbar';
 
         this.getName = function () {
             return _name;
@@ -25,7 +31,7 @@ define(['jquery',
                     };
                     var render = Mustache.render(template, view);
                     console.log('Locale? ' + translate.company);
-                    $('#main_content_placeholder').html(_name);
+                    $('#navbar_placeholder').html(render);
                 });
 
         };

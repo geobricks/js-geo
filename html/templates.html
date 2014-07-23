@@ -19,15 +19,31 @@
                 <div class='fs-languages'>
                     <span id='langE' class='fs-lan-selected'>ENGLISH</span>
                     |
-                    <span id='langF'>FRANÇAIS</span>
-                    |
-                    <span id='langS'>ESPAÑOL</span>
+                    <span id='langF'><a style='color: #FFFFFF;' target='_blank' href="http://localhost:8080/js-geo/#home/it">ITALIANO</a></span>
                 </div>
             </div>
 
         </div>
 
     </div>
+
+    <div id='navbar_placeholder'>
+
+    </div>
+
+    <div id='main_content_placeholder'>
+
+    </div>
+
+    <div class='row'>
+        <div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+            <div class='gb-footer'></div>
+        </div>
+    </div>
+
+</div>
+
+<div id='navbar'>
 
     <div class='row'>
 
@@ -42,14 +58,14 @@
                             <span class='icon-bar'></span>
                             <span class='icon-bar'></span>
                         </button>
-                        <a class='navbar-brand' href='#'>
+                        <a class='navbar-brand' onclick="Backbone.history.navigate('home/en', true);">
                             {{company}}
                         </a>
                     </div>
                     <div class='collapse navbar-collapse' id='bs-example-navbar-collapse-1'>
                         <ul class='nav navbar-nav'>
                             <li>
-                                <a href='#'>
+                                <a onclick="Backbone.history.navigate('browse/it', true);">
                                     {{browse}}
                                 </a>
                             </li>
@@ -65,12 +81,6 @@
 
         </div>
 
-    </div>
-
-    <div class='row'>
-        <div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
-            <div class='gb-footer'></div>
-        </div>
     </div>
 
 </div>

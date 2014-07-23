@@ -1,8 +1,8 @@
 define({
     'root' : {
-        'company' : 'GeoBricks',
-        'browse': 'Esplora',
+        'company' : 'Home',
+        'browse': 'Browse',
         'download': 'Download'
     },
-    'it-IT' : true
+    'it' : true
 });
