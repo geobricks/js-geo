@@ -32,5 +32,4 @@ define(['jquery',
     };
 
     return returnedModule;
-
 });

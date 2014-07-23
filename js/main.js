@@ -28,7 +28,6 @@ require.config({
             exports: '_'
         }
     }
-
 });
 
 require(['jquery',

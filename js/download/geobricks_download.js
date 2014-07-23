@@ -57,6 +57,7 @@ define(['jquery',
             suffix: ''
         };
 
+
         // private instance methods
         var init = function(obj) {
             o = $.extend(true, {}, o, obj);

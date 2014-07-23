@@ -24,7 +24,6 @@ define(['jquery',
             });
         }
 
-        // public instance methods
         return {
             build: build
         };
