@@ -23,7 +23,9 @@ define(['jquery',
                 var view = {
                     company: translate.company,
                     browse: translate.browse,
-                    download: translate.download
+                    download: translate.download,
+                    configuration: translate.configuration,
+                    login: translate.login
                 };
                 var render = Mustache.render(template, view);
                 $('#' + CONFIG.placeholder).html(render);

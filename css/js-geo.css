@@ -39,7 +39,7 @@
   margin: 0; }
 
 .fs-united p {
-  height: 12px;
+  height: 6px;
   line-height: 7px; }
 
 .fs-bold {
@@ -48,3 +48,6 @@
 .gb-footer {
   height: 50px;
   background-color: #174C74; }
+
+#banner_row {
+  background-color: #379BCE; }

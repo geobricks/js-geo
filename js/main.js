@@ -47,6 +47,7 @@ require.config({
             deps: ['jquery', 'leaflet', 'jquery-ui', 'fenix-map-config', 'import-dependencies', 'jquery.power.tip', 'jquery.i18n.properties', 'jquery.hoverIntent', 'chosen']
         }
     }
+
 });
 
 require(['jquery',
@@ -80,6 +81,8 @@ require(['jquery',
             '(/)browse(/)': 'browse',
             '(/)download(/):lang': 'download',
             '(/)download(/)': 'download',
+            '(/)configuration(/):lang': 'configuration',
+            '(/)configuration(/)': 'configuration',
             '': 'home'
         },
 
@@ -95,6 +98,10 @@ require(['jquery',
 
         download: function(lang) {
             var chart = new FMChartScatter()
+        },
+
+        configuration: function(lang) {
+
         },
 
         _init: function (lang) {
