@@ -22,16 +22,16 @@ require({locale: 'it-IT'},
         ['jquery',
          'mustache',
          'text!../../html/templates.html',
-         'i18n!nls/speak',
+         'i18n!nls/translate',
          'bootstrap',
          'chosen',
-         'highcharts'], function($, Mustache, templates, speak) {
+         'highcharts'], function($, Mustache, templates, translate) {
 
     var template = $(templates).filter('#structure').html();
     var view = {
-        company: speak.header,
-        browse: 'Browse',
-        download: 'Download'
+        company: translate.company,
+        browse: translate.browse,
+        download: translate.download
     };
     var render = Mustache.render(template, view);
     $('#js_geo_placeholder').append(render);
