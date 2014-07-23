@@ -43,7 +43,6 @@ require(['jquery',
          'domReady!'], function($, Mustache, templates, Backbone, navbar_def, browse_def, log) {
 
     log.setLevel(0);
-    log.info('bella');
 
     var ApplicationRouter = Backbone.Router.extend({
 
