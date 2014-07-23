@@ -1,5 +1,5 @@
 require.config({
-    locale: "",
+    locale: '',
 
     baseUrl: 'js/libs',
 
@@ -29,7 +29,12 @@ require.config({
 
 });
 
-require(['jquery','backbone', 'i18n', 'loglevel', 'domReady!'], function ($, Backbone, i18n, log) {
+require(
+        ['jquery',
+        'backbone',
+        'i18n',
+        'loglevel',
+        'domReady!'], function ($, Backbone, i18n, log) {
     //This function is called once the DOM is ready,
     //notice the value for 'domReady!' is the current
     //document.
@@ -38,23 +43,22 @@ require(['jquery','backbone', 'i18n', 'loglevel', 'domReady!'], function ($, Bac
 
     var ApplicationRouter = Backbone.Router.extend({
 
+        lang : null,
+
         initialize: function (options) {
             Backbone.history.start();
         },
         //map url routes to contained methods
         routes: {
-            "": "home",
-            "home": "home",
+            "(/)home(/)": "home",
+            "(/)home(/):lang": "home",
             "about": "about",
             "contact/:id": "contact"
         },
 
-        home: function() {
-            log.info("home");
-
-            require(
-                {locale: 'it-IT'},
-                ["i18n!nls/speak"], function (i18n) {
+        home: function(lang) {
+            this._init(lang);
+            require(["i18n!nls/speak"], function (i18n) {
                  log.info("home2");
                 log.info(i18n);
                 log.info(i18n.header);
@@ -68,6 +72,14 @@ require(['jquery','backbone', 'i18n', 'loglevel', 'domReady!'], function ($, Bac
 
         contact: function(id) {
             // l.info(id)
+        },
+
+        _init: function(lang) {
+            if ( lang ) this._initLanguage(lang)
+        },
+
+        _initLanguage: function (lang) {
+            require.config({"locale" : lang});
         }
     });
 
