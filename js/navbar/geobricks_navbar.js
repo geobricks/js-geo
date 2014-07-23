@@ -3,7 +3,9 @@ define(['jquery',
         'text!../../html/templates.html',
         'bootstrap'], function ($, Mustache, templates) {
 
-    var returnedModule = function (config) {
+    var global = this;
+
+    global.Navbar = function (config) {
 
         var CONFIG = {
             lang: 'en',
@@ -15,7 +17,7 @@ define(['jquery',
 
         require.config({'locale' : CONFIG.lang});
 
-        this.build = function () {
+        var build = function () {
             require(['i18n!nls/translate'], function (translate) {
                 var template = $(templates).filter('#' + CONFIG.template_id).html();
                 var view = {
@@ -29,7 +31,10 @@ define(['jquery',
 
         };
 
+        return {
+            build: build
+        };
+
     };
 
-    return returnedModule;
 });

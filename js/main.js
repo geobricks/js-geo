@@ -34,14 +34,14 @@ require(['jquery',
          'mustache',
          'text!../../html/templates.html',
          'backbone',
-         'navbar',
          'browse',
          'loglevel',
+         'navbar',
          'download',
          'bootstrap',
          'chosen',
          'highcharts',
-         'domReady!'], function($, Mustache, templates, Backbone, navbar_def, browse, log) {
+         'domReady!'], function($, Mustache, templates, Backbone, browse, log) {
 
     log.setLevel(0);
 
@@ -88,7 +88,7 @@ require(['jquery',
                 var view = {};
                 var render = Mustache.render(template, view);
                 $('#js_geo_placeholder').html(render);
-                var navbar = new navbar_def({lang: lang});
+                var navbar = new Navbar({lang: lang});
                 navbar.build();
             }
 
