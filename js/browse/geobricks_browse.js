@@ -5,7 +5,6 @@ define(['jquery',
 
     var returnedModule = function (lang) {
 
-        console.log('lang? ' + lang);
         require.config({"locale" : lang});
 
         var _name = 'Module: Browse';
@@ -24,7 +23,6 @@ define(['jquery',
                         download: translate.download
                     };
                     var render = Mustache.render(template, view);
-                    console.log('Locale? ' + translate.company);
                     $('#main_content_placeholder').html(_name);
                 });
 

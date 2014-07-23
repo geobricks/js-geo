@@ -8,6 +8,7 @@ require.config({
         chosen      :   '//fenixapps.fao.org/repository/js/chosen/1.0.0/chosen.jquery.min',
         highcharts  :   '//code.highcharts.com/highcharts',
         jquery      :   '//code.jquery.com/jquery-1.10.1.min',
+        loglevel    :   'logger/loglevel.min',
         mustache    :   '//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache',
         navbar      :   '../navbar/geobricks_navbar',
         browse      :   '../browse/geobricks_browse',
@@ -35,60 +36,65 @@ require(['jquery',
          'backbone',
          'navbar',
          'browse',
+         'loglevel',
          'bootstrap',
          'chosen',
-         'highcharts'], function($, Mustache, templates, Backbone, navbar_def, browse_def) {
+         'highcharts',
+         'domReady!'], function($, Mustache, templates, Backbone, navbar_def, browse_def, log) {
 
-        var ApplicationRouter = Backbone.Router.extend({
+    log.setLevel(0);
+    log.info('bella');
 
-            initialize: function (options) {
-                Backbone.history.start();
-            },
+    var ApplicationRouter = Backbone.Router.extend({
 
-            routes: {
-                '(/)home(/):lang': 'home',
-                '(/)home(/)': 'home',
-                '(/)browse(/):lang': 'browse',
-                '(/)browse(/)': 'browse',
-                '': 'home'
-            },
+        isRendered: false,
 
-            home: function(lang) {
-                console.log('home:');
-                this._init(lang);
-            },
+        initialize: function (options) {
+            Backbone.history.start();
+        },
 
-            browse: function(lang) {
-                console.log('browse:');
-                this._init(lang);
-                var browse = new browse_def(lang);
-                browse.build_navbar();
-            },
+        routes: {
+            '(/)home(/):lang': 'home',
+            '(/)home(/)': 'home',
+            '(/)browse(/):lang': 'browse',
+            '(/)browse(/)': 'browse',
+            '': 'home'
+        },
 
-            _init: function(lang) {
-                if ( lang )
-                    this._initLanguage(lang)
+        home: function (lang) {
+            this._init(lang);
+            $('#main_content_placeholder').html('home');
+        },
 
+        browse: function (lang) {
+            this._init(lang);
+            var browse = new browse_def(lang);
+            browse.build_navbar();
+        },
+
+        _init: function (lang) {
+
+            if (lang)
+                this._initLanguage(lang)
+
+            if (!this.isRendered) {
+                this.isRendered = true;
                 var template = $(templates).filter('#structure').html();
                 var view = {};
                 var render = Mustache.render(template, view);
                 $('#js_geo_placeholder').html(render);
-
-                var navbar = new navbar_def(lang);
-                navbar.build_navbar();
-
-            },
-
-            _initLanguage: function (lang) {
-                require.config({"locale" : lang});
+                var navbar = new navbar_def({lang: lang});
+                navbar.build();
             }
 
-        });
+        },
 
-        new ApplicationRouter();
+        _initLanguage: function (lang) {
+            require.config({"locale": lang});
+        }
 
+    });
 
-
-
+    new ApplicationRouter();
 
 });
