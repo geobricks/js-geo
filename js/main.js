@@ -16,16 +16,15 @@ require.config({
         underscore      :   '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min',
 
         // fenix-map-js
-        'import-dependencies'   :   'http://fenixapps.fao.org/repository/js/FENIX/utils/import-dependencies-1.0',
-        'jquery-ui'             :   '//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min',
-        'leaflet'               :   'http://fenixapps.fao.org/repository/js/leaflet/0.7.2/leaflet',
-        'jquery.power.tip'      :   'http://fenixapps.fao.org/repository/js/jquery.power.tip/1.1.0/jquery.powertip.min',
-        'jquery-ui'             :   'http://fenixapps.fao.org/repository/js/jquery-ui/1.10.3/jquery-ui-1.10.3.custom.min',
-        'jquery.i18n.properties':   'http://fenixapps.fao.org/repository/js/jquery/1.0.9/jquery.i18n.properties-min',
-        'jquery.hoverIntent'    :   'http://fenixapps.fao.org/repository/js/jquery.hoverIntent/1.0/jquery.hoverIntent',
+        'import-dependencies'   :   '//fenixapps.fao.org/repository/js/FENIX/utils/import-dependencies-1.0',
+        'leaflet'               :   '//fenixapps.fao.org/repository/js/leaflet/0.7.2/leaflet',
+        'jquery.power.tip'      :   '//fenixapps.fao.org/repository/js/jquery.power.tip/1.1.0/jquery.powertip.min',
+        'jquery-ui'             :   '//fenixapps.fao.org/repository/js/jquery-ui/1.10.3/jquery-ui-1.10.3.custom.min',
+        'jquery.i18n.properties':   '//fenixapps.fao.org/repository/js/jquery/1.0.9/jquery.i18n.properties-min',
+        'jquery.hoverIntent'    :   '//fenixapps.fao.org/repository/js/jquery.hoverIntent/1.0/jquery.hoverIntent',
 
-        'fenix-map'             :   'http://localhost:7070/fenix-map-js/fenix-map-min',
-        'fenix-map-config'      :   'http://localhost:7070/fenix-map-js/fenix-map-config'
+        'fenix-map'             :   '//localhost:7070/fenix-map-js/fenix-map-min',
+        'fenix-map-config'      :   '//localhost:7070/fenix-map-js/fenix-map-config'
     },
 
     shim: {
@@ -39,13 +38,13 @@ require.config({
         underscore: {
             exports: '_'
         },
-        
 
-        'jquery-ui' :  {
-            deps: ['jquery']
-        },
+        'jquery-ui' : ['jquery'],
+        'jquery.power.tip': ['jquery'],
+        'jquery.i18n.properties': ['jquery'],
+        'jquery.hoverIntent': ['jquery'],
         'fenix-map':  {
-            deps: ['jquery', 'jquery-ui', 'fenix-map-config', 'import-dependencies', 'jquery.power.tip', 'jquery.i18n.properties', 'jquery.hoverIntent']
+            deps: ['jquery', 'leaflet', 'jquery-ui', 'fenix-map-config', 'import-dependencies', 'jquery.power.tip', 'jquery.i18n.properties', 'jquery.hoverIntent', 'chosen']
         }
     }
 });

@@ -1,18 +1,22 @@
 define(['jquery',
     'mustache',
-    'text!../../html/templates.html',
-    'bootstrap'], function ($, Mustache, templates) {
+    'text!../../html/browse.html',
+    'loglevel',
+    'fenix-map',
+    'bootstrap'], function ($, Mustache, templates, log) {
 
         var CONFIG = {
             lang: 'en',
             placeholder: 'main_content_placeholder',
-            template_id: 'navbar'
+            template_id: 'map'
         }
 
         var build = function(config) {
             CONFIG = $.extend(true, {}, CONFIG, config);
 
             require(['i18n!nls/translate'], function (translate) {
+
+                log.info(templates);
                 var template = $(templates).filter('#' + CONFIG.template_id).html();
                 var view = {
                     company: translate.company,
@@ -20,7 +24,18 @@ define(['jquery',
                     download: translate.download
                 };
                 var render = Mustache.render(template, view);
-                $('#' + CONFIG.placeholder).html("browse");
+                log.info(template);
+                $('#' + CONFIG.placeholder).html(templates);
+
+                var options = {
+                    plugins: { geosearch : true, mouseposition: false, controlloading : true,zoomControl: 'bottomright'},
+                    guiController: { overlay : true,  baselayer: true,  wmsLoader: true },
+                    gui: {disclaimerfao: true }
+                }
+
+                var mapOptions = { zoomControl:false,attributionControl: false };
+                var m = new FM.Map('map', options, mapOptions);
+                m.createMap();
             });
         }
 
