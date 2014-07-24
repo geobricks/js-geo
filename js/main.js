@@ -54,15 +54,10 @@ require(['jquery',
          'mustache',
          'text!../../html/templates.html',
          'backbone',
-         'browse',
          'loglevel',
          'navbar',
-         'download',
          'bootstrap',
-         'chosen',
-         'highcharts',
-         'fenix-map',
-         'domReady!'], function($, Mustache, templates, Backbone, browse, log) {
+         'domReady!'], function($, Mustache, templates, Backbone, log) {
 
     log.setLevel(0);
 
@@ -93,7 +88,9 @@ require(['jquery',
 
         browse: function (lang) {
             this._init(lang);
-            browse.build({lang: lang});
+            require(['browse'], function() {
+                GBBrowse().build({lang: lang});
+            });
         },
 
         download: function(lang) {

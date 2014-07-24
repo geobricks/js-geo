@@ -5,6 +5,10 @@ define(['jquery',
     'fenix-map',
     'bootstrap'], function ($, Mustache, templates, log) {
 
+    var global = this;
+
+    global.GBBrowse = function() {
+
         var CONFIG = {
             lang: 'en',
             placeholder: 'main_content_placeholder',
@@ -28,7 +32,7 @@ define(['jquery',
                 $('#' + CONFIG.placeholder).html(templates);
 
                 var options = {
-                    plugins: { geosearch : true, mouseposition: false, controlloading : true,zoomControl: 'bottomright'},
+                    plugins: { geosearch : true, mouseposition: false, controlloading : true, zoomControl: 'bottomright'},
                     guiController: { overlay : true,  baselayer: true,  wmsLoader: true },
                     gui: {disclaimerfao: true }
                 }
@@ -39,7 +43,10 @@ define(['jquery',
             });
         }
 
+        // public instance methods
         return {
             build: build
         };
+    };
+
 });
