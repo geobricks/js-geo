@@ -1,3 +1,8 @@
+$font-stack:    'Roboto Condensed',sans-serif;
+$primary-color: #174C74;
+$banner-color:  #379bce;
+
+
 .fs-logo {
   background-image: url('../images/fs-logo.png');
   background-repeat: no-repeat;
@@ -7,7 +12,7 @@
 }
 
 .fs-logo-holder {
-  background-color: #174c74;
+  background-color: $primary-color;
   float: left;
   height: 50px;
   padding: 7px 0 0 20px;
@@ -15,12 +20,12 @@
 }
 
 .fs-head {
-  background-color: #379bce;
+  background-color: $banner-color;
   height: 50px;
 }
 
 .fs-united {
-  background-color: #379bce;
+  background-color: $banner-color;
   color: white;
   float: left;
   height: 50px;
@@ -28,7 +33,7 @@
 }
 
 .fs-languages {
-  background-color: #379bce;
+  background-color: $banner-color;
   color: white;
   float: right;
   height: 100%;
@@ -40,7 +45,7 @@
 }
 
 * {
-  font-family: Arial,Helvetica,sans-serif;
+  font-family: $font-stack;
   font-size: 14px;
   margin: 0;
 }
@@ -56,9 +61,9 @@
 
 .gb-footer {
   height: 50px;
-  background-color: #174C74;
+  background-color: $primary-color;
 }
 
 #banner_row {
-  background-color: #379BCE;
+  background-color: $banner-color;
 }

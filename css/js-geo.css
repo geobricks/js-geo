@@ -34,7 +34,7 @@
   text-decoration: underline; }
 
 * {
-  font-family: Arial,Helvetica,sans-serif;
+  font-family: "Roboto Condensed", sans-serif;
   font-size: 14px;
   margin: 0; }
 
@@ -47,7 +47,7 @@
 
 .gb-footer {
   height: 50px;
-  background-color: #174C74; }
+  background-color: #174c74; }
 
 #banner_row {
-  background-color: #379BCE; }
+  background-color: #379bce; }
