@@ -126,13 +126,26 @@
     </div>
 </div>
 
-<div id='generic_dropdown_template'>
+<div id='single_generic_dropdown_template'>
     <div class='row' style='margin-top: 20px;'>
         <div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
-            <label for='{{generic_dropdown_id}}'>
-                {{generic_dropdown_label}}
+            <label for='{{single_generic_dropdown_id}}'>
+                {{single_generic_dropdown_label}}
             </label>
-            <select id='{{generic_dropdown_id}}' style='width: 100%;'>
+            <select id='{{single_generic_dropdown_id}}' style='width: 100%;'>
+                <option>Test</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div id='multiple_generic_dropdown_template'>
+    <div class='row' style='margin-top: 20px;'>
+        <div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+            <label for='{{multiple_generic_dropdown_id}}'>
+                {{multiple_generic_dropdown_label}}
+            </label>
+            <select multiple='' id='{{multiple_generic_dropdown_id}}' style='width: 100%;'>
                 <option>Test</option>
             </select>
         </div>

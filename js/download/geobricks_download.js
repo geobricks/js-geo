@@ -5,12 +5,13 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
     global.DWLD = function() {
 
         var CONFIG = {
-            lang:                           'en',
-            url_data_providers:             'http://127.0.0.1:5005/schema/sources/',
-            id_placeholder:                 'main_content_placeholder',
-            id_data_providers_template:     'data_providers_template',
-            id_data_providers:              'data_providers',
-            id_generic_dropdown_template:   'generic_dropdown_template'
+            lang:                                   'en',
+            url_data_providers:                     'http://127.0.0.1:5005/schema/sources/',
+            id_placeholder:                         'main_content_placeholder',
+            id_data_providers_template:             'data_providers_template',
+            id_data_providers:                      'data_providers',
+            id_single_generic_dropdown_template:    'single_generic_dropdown_template',
+            id_multiple_generic_dropdown_template:  'multiple_generic_dropdown_template'
         };
 
         var init = function(config) {
@@ -106,6 +107,9 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
         var create_dropdown = function(json, index) {
 
+            console.log(json);
+            console.log(json.services[index].selection_type);
+
             if (json.services[index].parameters.length > 0) {
                 for (var i = 0 ; i < json.services[index].parameters.length ; i++) {
                     var p = '{' + json.services[index].parameters[i].parameter_name + '}';
@@ -131,13 +135,17 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             inner_json = $.parseJSON(response);
 
                         /* Load template. */
+                        var template;
+                        if (json.services[index].selection_type == 'single') {
+                            template = $(templates).filter('#' + CONFIG.id_single_generic_dropdown_template).html();
+                        } else if (json.services[index].selection_type == 'multiple') {
+                            template = $(templates).filter('#' + CONFIG.id_multiple_generic_dropdown_template).html();
+                        }
                         var view = {
-                            generic_dropdown_label: json.services[index].description[CONFIG.lang],
-                            generic_dropdown_id: json.services[index].id
+                            single_generic_dropdown_label: json.services[index].description[CONFIG.lang],
+                            single_generic_dropdown_id: json.services[index].id
                         };
-                        var template = $(templates).filter('#' + CONFIG.id_generic_dropdown_template).html();
                         var render = Mustache.render(template, view);
-
                         $('#' + CONFIG.id_placeholder).append(render);
 
                         /* Create drop-down. */
