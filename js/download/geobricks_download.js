@@ -107,9 +107,6 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
         var create_dropdown = function(json, index) {
 
-            console.log(json);
-            console.log(json.services[index].selection_type);
-
             if (json.services[index].parameters.length > 0) {
                 for (var i = 0 ; i < json.services[index].parameters.length ; i++) {
                     var p = '{' + json.services[index].parameters[i].parameter_name + '}';
@@ -136,15 +133,20 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
                         /* Load template. */
                         var template;
+                        var view;
                         if (json.services[index].selection_type == 'single') {
                             template = $(templates).filter('#' + CONFIG.id_single_generic_dropdown_template).html();
+                            view = {
+                                single_generic_dropdown_label: json.services[index].description[CONFIG.lang],
+                                single_generic_dropdown_id: json.services[index].id
+                            };
                         } else if (json.services[index].selection_type == 'multiple') {
                             template = $(templates).filter('#' + CONFIG.id_multiple_generic_dropdown_template).html();
+                            view = {
+                                multiple_generic_dropdown_label: json.services[index].description[CONFIG.lang],
+                                multiple_generic_dropdown_id: json.services[index].id
+                            };
                         }
-                        var view = {
-                            single_generic_dropdown_label: json.services[index].description[CONFIG.lang],
-                            single_generic_dropdown_id: json.services[index].id
-                        };
                         var render = Mustache.render(template, view);
                         $('#' + CONFIG.id_placeholder).append(render);
 
@@ -163,12 +165,14 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             $('#' + json.services[index].id).chosen({disable_search_threshold: 10});
 
                             /* Add change listener. */
-                            $('#' + json.services[index].id).on('change', function () {
-                                var tmp = {};
-                                tmp.base_url = json.base_url;
-                                tmp.services = json.services[index].services;
-                                create_dropdown(tmp, 0);
-                            });
+                            if (json.services[index].services != null) {
+                                $('#' + json.services[index].id).on('change', function () {
+                                    var tmp = {};
+                                    tmp.base_url = json.base_url;
+                                    tmp.services = json.services[index].services;
+                                    create_dropdown(tmp, 0);
+                                });
+                            }
 
                         });
 
