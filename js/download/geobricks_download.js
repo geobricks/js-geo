@@ -108,8 +108,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
             if (json.services[index].parameters.length > 0) {
                 for (var i = 0 ; i < json.services[index].parameters.length ; i++) {
-                    var p = '{' + json.services[index].parameters[0].parameter_name + '}';
-                    var v = $('#' + json.services[index].parameters[0].parameter_value).val()
+                    var p = '{' + json.services[index].parameters[i].parameter_name + '}';
+                    var v = $('#' + json.services[index].parameters[i].parameter_value).val()
                     json.services[index].path = json.services[index].path.replace(p, v);
                 }
             }
@@ -132,7 +132,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
                         /* Load template. */
                         var view = {
-                            generic_dropdown_label: json.services[index].description['it'],
+                            generic_dropdown_label: json.services[index].description[CONFIG.lang],
                             generic_dropdown_id: json.services[index].id
                         };
                         var template = $(templates).filter('#' + CONFIG.id_generic_dropdown_template).html();
@@ -144,7 +144,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         var s = '';
                         s += '<option value="null">' + translate.please_select + '</option>';
                         for (var i = 0; i < inner_json.length; i++)
-                            s += '<option value="' + inner_json[i].code + '">' + inner_json[i].label + '</option>';
+                            s += '<option value="' + inner_json[i][json.services[index].payload.id] + '">' + inner_json[i][json.services[index].payload.label] + '</option>';
 
                         $('#' + json.services[index].id).html(s);
 
