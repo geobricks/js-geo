@@ -2,6 +2,11 @@ $font-stack:    'Roboto Condensed',sans-serif;
 $primary-color: #174C74;
 $banner-color:  #379bce;
 
+* {
+  font-family: $font-stack;
+  font-size: 14px;
+  margin: 0;
+}
 
 .fs-logo {
   background-image: url('../images/fs-logo.png');
@@ -44,12 +49,6 @@ $banner-color:  #379bce;
   text-decoration: underline;
 }
 
-* {
-  font-family: $font-stack;
-  font-size: 14px;
-  margin: 0;
-}
-
 .fs-united p {
   height: 6px;
   line-height: 7px;
@@ -60,10 +59,21 @@ $banner-color:  #379bce;
 }
 
 .gb-footer {
-  height: 50px;
+  height: 100px;
+  line-height: 100px;
   background-color: $primary-color;
+  margin-top: 250px;
 }
 
 #banner_row {
   background-color: $banner-color;
+}
+
+.chosen-single {
+  height: 35px !important;
+  line-height: 35px !important;
+}
+
+.chosen-container-single .chosen-single div {
+  top: 6px !important;
 }

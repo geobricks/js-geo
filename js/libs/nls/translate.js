@@ -4,7 +4,9 @@ define({
         'browse': 'Browse',
         'download': 'Download',
         'configuration': 'Configuration',
-        'login': 'Login'
+        'login': 'Login',
+        'data_providers': 'Data Providers',
+        'please_select': 'Please Select...'
     },
     'it' : true
 });

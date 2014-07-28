@@ -55,6 +55,7 @@ require(['jquery',
          'text!../../html/templates.html',
          'backbone',
          'loglevel',
+         'chosen',
          'navbar',
          'bootstrap',
          'domReady!'], function($, Mustache, templates, Backbone, log) {
@@ -94,7 +95,10 @@ require(['jquery',
         },
 
         download: function(lang) {
-            var chart = new FMChartScatter()
+            this._init(lang);
+            require(['download'], function() {
+                DWLD().init({lang: lang});
+            });
         },
 
         configuration: function(lang) {
