@@ -46,7 +46,8 @@
     </div>
 
     <div id='main_content_placeholder'>
-
+        <div id='data_providers_placeholder'></div>
+        <div id='selectors_placeholder'></div>
     </div>
 
     <div class='row'>
@@ -126,26 +127,30 @@
 </div>
 
 <div id='single_generic_dropdown_template'>
-    <div class='row' style='margin-top: 20px;'>
-        <div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
-            <label for='{{single_generic_dropdown_id}}'>
-                {{single_generic_dropdown_label}}
-            </label>
-            <select id='{{single_generic_dropdown_id}}' style='width: 100%;'>
-            </select>
+    <div id='{{single_generic_dropdown_container_id}}'>
+        <div class='row' style='margin-top: 20px;'>
+            <div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+                <label for='{{single_generic_dropdown_id}}'>
+                    {{single_generic_dropdown_label}}
+                </label>
+                <select id='{{single_generic_dropdown_id}}' style='width: 100%;'>
+                </select>
+            </div>
         </div>
     </div>
 </div>
 
 <div id='multiple_generic_dropdown_template'>
-    <div class='row' style='margin-top: 20px;'>
-        <div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
-            <label for='{{multiple_generic_dropdown_id}}'>
-                {{multiple_generic_dropdown_label}}
-            </label>
-            <select multiple='' id='{{multiple_generic_dropdown_id}}' style='width: 100%;'>
-                <option>Test</option>
-            </select>
+    <div id='{{multiple_generic_dropdown_container_id}}'>
+        <div class='row' style='margin-top: 20px;'>
+            <div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+                <label for='{{multiple_generic_dropdown_id}}'>
+                    {{multiple_generic_dropdown_label}}
+                </label>
+                <select multiple='' id='{{multiple_generic_dropdown_id}}' style='width: 100%;'>
+                    <option>Test</option>
+                </select>
+            </div>
         </div>
     </div>
 </div>

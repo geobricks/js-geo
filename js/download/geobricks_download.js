@@ -8,7 +8,9 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             lang:                                   'en',
             url_data_providers:                     'http://127.0.0.1:5005/schema/sources/',
             id_placeholder:                         'main_content_placeholder',
+            id_data_providers_placeholder:          'data_providers_placeholder',
             id_data_providers_template:             'data_providers_template',
+            id_selectors_placeholder:               'selectors_placeholder',
             id_data_providers:                      'data_providers',
             id_single_generic_dropdown_template:    'single_generic_dropdown_template',
             id_multiple_generic_dropdown_template:  'multiple_generic_dropdown_template'
@@ -50,7 +52,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         var render = Mustache.render(template, view);
 
                         /* Add template to the main page. */
-                        $('#' + CONFIG.id_placeholder).html(render);
+                        $('#' + CONFIG.id_data_providers_placeholder).html(render);
 
                         /* Populate drop-down. */
                         var s = '';
@@ -138,17 +140,19 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             template = $(templates).filter('#' + CONFIG.id_single_generic_dropdown_template).html();
                             view = {
                                 single_generic_dropdown_label: json.services[index].description[CONFIG.lang],
-                                single_generic_dropdown_id: json.services[index].id
+                                single_generic_dropdown_id: json.services[index].id,
+                                single_generic_dropdown_container_id: json.services[index].id + '_container'
                             };
                         } else if (json.services[index].selection_type == 'multiple') {
                             template = $(templates).filter('#' + CONFIG.id_multiple_generic_dropdown_template).html();
                             view = {
                                 multiple_generic_dropdown_label: json.services[index].description[CONFIG.lang],
-                                multiple_generic_dropdown_id: json.services[index].id
+                                multiple_generic_dropdown_id: json.services[index].id,
+                                multiple_generic_dropdown_container_id: json.services[index].id + '_container'
                             };
                         }
                         var render = Mustache.render(template, view);
-                        $('#' + CONFIG.id_placeholder).append(render);
+                        $('#' + CONFIG.id_selectors_placeholder).append(render);
 
                         /* Create drop-down. */
                         var s = '';
@@ -170,8 +174,11 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                                     var tmp = {};
                                     tmp.base_url = json.base_url;
                                     tmp.services = json.services[index].services;
-                                    for (var z = 0 ; z < json.services[index].services.length ; z++)
+                                    for (var z = 0; z < json.services[index].services.length; z++) {
                                         create_dropdown(tmp, z);
+                                        /* Empty children on drop-down change. */
+                                        $('#' + json.services[index].services[z].id + '_container').empty();
+                                    }
                                 });
                             }
 
