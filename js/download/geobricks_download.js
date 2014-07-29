@@ -170,7 +170,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                                     var tmp = {};
                                     tmp.base_url = json.base_url;
                                     tmp.services = json.services[index].services;
-                                    create_dropdown(tmp, 0);
+                                    for (var z = 0 ; z < json.services[index].services.length ; z++)
+                                        create_dropdown(tmp, z);
                                 });
                             }
 
