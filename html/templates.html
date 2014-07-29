@@ -48,6 +48,7 @@
     <div id='main_content_placeholder'>
         <div id='data_providers_placeholder'></div>
         <div id='selectors_placeholder'></div>
+        <div id='buttons_placeholder'></div>
     </div>
 
     <div class='row'>
@@ -150,6 +151,18 @@
                 <select multiple='' id='{{multiple_generic_dropdown_id}}' style='width: 100%;'>
                     <option>Test</option>
                 </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id='download_button_template'>
+    <div id='download_button_container'>
+        <div class='row' style='margin-top: 20px;'>
+            <div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+                <button style='width: 100%;' class='btn btn-primary'>
+                    <i class='fa fa-cloud-download'></i> {{download_label}}
+                </button>
             </div>
         </div>
     </div>

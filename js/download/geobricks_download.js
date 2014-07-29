@@ -13,7 +13,9 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             id_selectors_placeholder:               'selectors_placeholder',
             id_data_providers:                      'data_providers',
             id_single_generic_dropdown_template:    'single_generic_dropdown_template',
-            id_multiple_generic_dropdown_template:  'multiple_generic_dropdown_template'
+            id_multiple_generic_dropdown_template:  'multiple_generic_dropdown_template',
+            id_download_button_template:            'download_button_template',
+            id_buttons_placeholder:                 'buttons_placeholder'
         };
 
         var init = function(config) {
@@ -163,7 +165,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         $('#' + json.services[index].id).html(s);
 
                         /* Load Chosen plug-in. */
-                        require(['chosen'], function (translate) {
+                        require(['i18n!nls/translate'], function (translate) {
 
                             /* Enable Shosen plug-in. */
                             $('#' + json.services[index].id).chosen({disable_search_threshold: 10});
@@ -180,6 +182,18 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                                         $('#' + json.services[index].services[z].id + '_container').empty();
                                     }
                                 });
+                            }
+
+                            /* Add download button. */
+                            else {
+                                /* Load template. */
+                                var view = {
+                                    download_label: translate.download_label
+                                };
+                                var template = $(templates).filter('#' + CONFIG.id_download_button_template).html();
+                                var render = Mustache.render(template, view);
+                                $('#' + CONFIG.id_buttons_placeholder).empty();
+                                $('#' + CONFIG.id_buttons_placeholder).html(render);
                             }
 
                         });

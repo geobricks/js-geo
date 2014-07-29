@@ -5,5 +5,6 @@ define({
     'configuration': 'Configurazione',
     'login': 'Autenticazione',
     'data_providers': 'Sorgenti Dati',
-    'please_select': 'Selezionare Prego...'
+    'please_select': 'Selezionare Prego...',
+    'download_label': 'Scarica Layer Selezionati'
 });
