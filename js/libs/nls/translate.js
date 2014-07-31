@@ -7,7 +7,10 @@ define({
         'login': 'Login',
         'data_providers': 'Data Providers',
         'please_select': 'Please Select...',
-        'download_label': 'Download Selected Layers'
+        'download_label': 'Download Selected Layers',
+        'selectors_label': 'Selectors',
+        'progress_label': 'Progress'
     },
-    'it' : true
+    'it' : true,
+    'pt' : true
 });

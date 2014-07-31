@@ -33,7 +33,9 @@
   color: white;
   float: right;
   height: 100%;
-  padding: 15px 20px 0 0; }
+  padding: 15px 20px 0 0;
+  text-transform: uppercase;
+}
 
 .fs-languages span.fs-lan-selected {
   text-decoration: underline; }

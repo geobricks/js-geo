@@ -31,9 +31,11 @@
 
             <div class='fs-head'>
                 <div class='fs-languages'>
-                    <span id='langE' class='fs-lan-selected'>ENGLISH</span>
+                    <span>ENGLISH</span>
                     |
-                    <span id='langF'><a style='color: #FFFFFF;' target='_blank' href="http://localhost:8080/js-geo/#home/it">ITALIANO</a></span>
+                    <span><a style='color: #FFFFFF;' target='_blank' href="http://localhost:8080/js-geo/#home/it">ITALIANO</a></span>
+                    |
+                    <span class='fs-lan-selected'><a style='color: #FFFFFF;' target='_blank' href="http://localhost:8080/js-geo/#home/it">Português</a></span>
                 </div>
             </div>
 
@@ -46,9 +48,7 @@
     </div>
 
     <div id='main_content_placeholder'>
-        <div id='data_providers_placeholder'></div>
-        <div id='selectors_placeholder'></div>
-        <div id='buttons_placeholder'></div>
+
     </div>
 
     <div class='row'>
@@ -57,6 +57,31 @@
         </div>
     </div>
 
+</div>
+
+<div id='download_tabs'>
+    <ul class='nav nav-tabs' role='tablist'>
+        <li class='active'>
+            <a role='tab' data-toggle='tab' href='#tab_selectors'>
+                {{selectors_label}}
+            </a>
+        </li>
+        <li>
+            <a role='tab' data-toggle='tab' href='#tab_progress'>
+                {{progress_label}}
+            </a>
+        </li>
+    </ul>
+    <div class='tab-content'>
+        <div class='tab-pane active' id='tab_selectors'>
+            <div id='data_providers_placeholder'></div>
+            <div id='selectors_placeholder'></div>
+            <div id='buttons_placeholder'></div>
+        </div>
+        <div class='tab-pane' id='tab_progress'>
+            Progress....
+        </div>
+    </div>
 </div>
 
 <div id='navbar'>
@@ -116,7 +141,7 @@
 </div>
 
 <div id='data_providers_template'>
-    <div class='row'>
+    <div class='row' style='margin-top: 20px;'>
         <div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
             <label for='data_providers'>
                 {{data_providers_label}}

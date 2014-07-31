@@ -15,7 +15,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             id_single_generic_dropdown_template:    'single_generic_dropdown_template',
             id_multiple_generic_dropdown_template:  'multiple_generic_dropdown_template',
             id_download_button_template:            'download_button_template',
-            id_buttons_placeholder:                 'buttons_placeholder'
+            id_buttons_placeholder:                 'buttons_placeholder',
+            id_download_tabs_template:              'download_tabs'
         };
 
         var init = function(config) {
@@ -45,6 +46,17 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         var json = response;
                         if (typeof json == 'string')
                             json = $.parseJSON(response);
+
+                        /* Load tabs. */
+                        view = {
+                            selectors_label: translate.selectors_label,
+                            progress_label: translate.progress_label
+                        };
+                        template = $(templates).filter('#' + CONFIG.id_download_tabs_template).html();
+                        render = Mustache.render(template, view);
+
+                        /* Add template to the main page. */
+                        $('#' + CONFIG.id_placeholder).html(render);
 
                         /* Load template. */
                         var view = {
