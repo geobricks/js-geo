@@ -112,8 +112,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     if (typeof json == 'string')
                         json = $.parseJSON(response);
 
-                    for (var i = 0 ; i < json.services.length; i++)
-                        create_dropdown(json, i);
+                    for (var i = 0 ; i < json.services.filters.length; i++)
+                        create_dropdown(json.services.filters[i], i);
 
                 }
 
@@ -123,17 +123,17 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
         var create_dropdown = function(json, index) {
 
-            if (json.services[index].parameters.length > 0) {
-                for (var i = 0 ; i < json.services[index].parameters.length ; i++) {
-                    var p = '{' + json.services[index].parameters[i].parameter_name + '}';
-                    var v = $('#' + json.services[index].parameters[i].parameter_value).val()
-                    json.services[index].path = json.services[index].path.replace(p, v);
+            if (json.parameters.length > 0) {
+                for (var i = 0 ; i < json.parameters.length ; i++) {
+                    var p = '{' + json.parameters[i].parameter_name + '}';
+                    var v = $('#' + json.parameters[i].parameter_value).val()
+                    json.path = json.path.replace(p, v);
                 }
             }
 
             $.ajax({
 
-                url: json.base_url + json.services[index].path + '/',
+                url: json.base_url + json.path + '/',
                 type: 'GET',
                 dataType: 'json',
 
@@ -150,19 +150,19 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         /* Load template. */
                         var template;
                         var view;
-                        if (json.services[index].selection_type == 'single') {
+                        if (json.selection_type == 'single') {
                             template = $(templates).filter('#' + CONFIG.id_single_generic_dropdown_template).html();
                             view = {
-                                single_generic_dropdown_label: json.services[index].description[CONFIG.lang],
-                                single_generic_dropdown_id: json.services[index].id,
-                                single_generic_dropdown_container_id: json.services[index].id + '_container'
+                                single_generic_dropdown_label: json.description[CONFIG.lang],
+                                single_generic_dropdown_id: json.id,
+                                single_generic_dropdown_container_id: json.id + '_container'
                             };
-                        } else if (json.services[index].selection_type == 'multiple') {
+                        } else if (json.selection_type == 'multiple') {
                             template = $(templates).filter('#' + CONFIG.id_multiple_generic_dropdown_template).html();
                             view = {
-                                multiple_generic_dropdown_label: json.services[index].description[CONFIG.lang],
-                                multiple_generic_dropdown_id: json.services[index].id,
-                                multiple_generic_dropdown_container_id: json.services[index].id + '_container'
+                                multiple_generic_dropdown_label: json.description[CONFIG.lang],
+                                multiple_generic_dropdown_id: json.id,
+                                multiple_generic_dropdown_container_id: json.id + '_container'
                             };
                         }
                         var render = Mustache.render(template, view);
@@ -172,26 +172,23 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         var s = '';
                         s += '<option value="null">' + translate.please_select + '</option>';
                         for (var i = 0; i < inner_json.length; i++)
-                            s += '<option value="' + inner_json[i][json.services[index].payload.id] + '">' + inner_json[i][json.services[index].payload.label] + '</option>';
+                            s += '<option value="' + inner_json[i][json.payload.id] + '">' + inner_json[i][json.payload.label] + '</option>';
 
-                        $('#' + json.services[index].id).html(s);
+                        $('#' + json.id).html(s);
 
                         /* Load Chosen plug-in. */
                         require(['i18n!nls/translate'], function (translate) {
 
                             /* Enable Shosen plug-in. */
-                            $('#' + json.services[index].id).chosen({disable_search_threshold: 10});
+                            $('#' + json.id).chosen({disable_search_threshold: 10});
 
                             /* Add change listener. */
-                            if (json.services[index].services != null) {
-                                $('#' + json.services[index].id).on('change', function () {
-                                    var tmp = {};
-                                    tmp.base_url = json.base_url;
-                                    tmp.services = json.services[index].services;
-                                    for (var z = 0; z < json.services[index].services.length; z++) {
-                                        create_dropdown(tmp, z);
+                            if (json.services != null) {
+                                $('#' + json.id).on('change', function () {
+                                    for (var z = 0; z < json.services.length; z++) {
+                                        create_dropdown(json.services[z], z);
                                         /* Empty children on drop-down change. */
-                                        $('#' + json.services[index].services[z].id + '_container').empty();
+//                                        $('#' + json.id + '_container').empty();
                                     }
                                 });
                             }
