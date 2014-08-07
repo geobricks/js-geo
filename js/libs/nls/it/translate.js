@@ -1,7 +1,7 @@
 define({
     'company' : 'Casa',
     'browse': 'Esplora',
-    'download': 'Scarica',
+    'download': 'Pianificatore',
     'configuration': 'Configurazione',
     'login': 'Autenticazione',
     'data_providers': 'Sorgenti Dati',
