@@ -7,6 +7,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
         var CONFIG = {
             lang:                                   'en',
             url_data_providers:                     'http://127.0.0.1:5005/schema/sources/',
+            data_provider_config:                   null,
             id_placeholder:                         'main_content_placeholder',
             id_data_providers_placeholder:          'data_providers_placeholder',
             id_data_providers_template:             'data_providers_template',
@@ -16,7 +17,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             id_multiple_generic_dropdown_template:  'multiple_generic_dropdown_template',
             id_download_button_template:            'download_button_template',
             id_buttons_placeholder:                 'buttons_placeholder',
-            id_download_tabs_template:              'download_tabs'
+            id_download_tabs_template:              'download_tabs',
+            layers_list:                            []
         };
 
         var init = function(config) {
@@ -111,6 +113,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     var json = response;
                     if (typeof json == 'string')
                         json = $.parseJSON(response);
+                    CONFIG.data_provider_config = json;
 
                     for (var i = 0 ; i < json.services.filters.length; i++)
                         create_dropdown(json.base_url, json.services.filters[i], i);
@@ -192,14 +195,23 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
                             /* Add download button. */
                             else {
+
                                 /* Load template. */
                                 var view = {
                                     download_label: translate.download_label
                                 };
                                 var template = $(templates).filter('#' + CONFIG.id_download_button_template).html();
                                 var render = Mustache.render(template, view);
+
+                                /* Add button to the interface. */
                                 $('#' + CONFIG.id_buttons_placeholder).empty();
                                 $('#' + CONFIG.id_buttons_placeholder).html(render);
+
+                                /* List available layers. */
+                                $('#' + json.id).on('change', function () {
+                                    get_layers_list();
+                                });
+
                             }
 
                         });
@@ -209,6 +221,21 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 }
 
             });
+        };
+
+        var get_layers_list = function() {
+
+            /* Fill parameters with values from the drop-downs. */
+            if (CONFIG.data_provider_config.services.layers.parameters.length > 0) {
+                for (var i = 0 ; i < CONFIG.data_provider_config.services.layers.parameters.length ; i++) {
+                    var p = '{' + CONFIG.data_provider_config.services.layers.parameters[i].parameter_name + '}';
+                    var v = $('#' + CONFIG.data_provider_config.services.layers.parameters[i].parameter_value).val()
+                    CONFIG.data_provider_config.services.layers.path = CONFIG.data_provider_config.services.layers.path.replace(p, v);
+                }
+            }
+            console.log(CONFIG.data_provider_config.services.layers);
+            console.log(CONFIG.data_provider_config.base_url + CONFIG.data_provider_config.services.layers.path);
+
         };
 
         return {
