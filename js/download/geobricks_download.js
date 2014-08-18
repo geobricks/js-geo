@@ -113,7 +113,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         json = $.parseJSON(response);
 
                     for (var i = 0 ; i < json.services.filters.length; i++)
-                        create_dropdown(json.services.filters[i], i);
+                        create_dropdown(json.base_url, json.services.filters[i], i);
 
                 }
 
@@ -121,7 +121,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
         };
 
-        var create_dropdown = function(json, index) {
+        var create_dropdown = function(base_url, json, index) {
 
             if (json.parameters.length > 0) {
                 for (var i = 0 ; i < json.parameters.length ; i++) {
@@ -133,7 +133,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
             $.ajax({
 
-                url: json.base_url + json.path + '/',
+                url: base_url + json.path + '/',
                 type: 'GET',
                 dataType: 'json',
 
@@ -185,11 +185,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             /* Add change listener. */
                             if (json.services != null) {
                                 $('#' + json.id).on('change', function () {
-                                    for (var z = 0; z < json.services.length; z++) {
-                                        create_dropdown(json.services[z], z);
-                                        /* Empty children on drop-down change. */
-//                                        $('#' + json.id + '_container').empty();
-                                    }
+                                    for (var z = 0; z < json.services.length; z++)
+                                        create_dropdown(base_url, json.services[z], z);
                                 });
                             }
 
