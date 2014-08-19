@@ -33,24 +33,72 @@
                         'label': 'H 00, V 08 (5.15 MB)'
                     }
                 ];
-                console.log(JSON.stringify(data));
                 $.ajax({
-                    url: 'http://127.0.0.1:5005/download/modis/',
-                    type: 'POST',
+                    url: 'http://127.0.0.1:5005/browse/modis/mod13a1/2014/001/',
+                    type: 'GET',
                     dataType: 'json',
-                    data: JSON.stringify(data),
-                    contentType: 'application/json',
                     success: function (response) {
-                        alert(response);
+                        var json = response;
+                        if (typeof json == 'string')
+                            json = $.parseJSON(response);
+                        $.ajax({
+                            url: 'http://127.0.0.1:5005/download/modis/',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: JSON.stringify(json),
+                            contentType: 'application/json',
+                            success: function (response) {
+                                progress(json);
+                            }
+                        });
                     }
                 });
+            };
+            function progress(json) {
+                for (var i = 0 ; i < json.length ; i++) {
+                    var s = '';
+                    s += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">';
+                    s += '<div class="progress">';
+                    s += '<div id="' + json[i]['file_name'] + '" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">';
+                    s += json[i]['file_name'];
+                    s += '</div>';
+                    s += '</div>';
+                    s += '</div>';
+                    $('#progress_bars').append(s);
+                    if (i == 0) {
+                        var timer = setInterval(function (id) {
+                            $.ajax({
+                                url: 'http://127.0.0.1:5005/download/progress/' + id + '/',
+                                type: 'GET',
+                                success: function (progress) {
+                                    console.log(progress.progress);
+                                    $(document.getElementById(id)).attr('aria-valuenow', progress.progress);
+                                    $(document.getElementById(id)).css('width', progress.progress + '%');
+                                }
+                            });
+                        }, 1000, json[i]['file_name']);
+                    }
+                }
+            };
+            function update_progress(id) {
+                console.log(id);
+
             };
         </script>
 
     </head>
 
     <body>
-        <button onclick="test();">Click Me</button>
+        <div class="container">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <button style="width: 100%;" onclick="test();" class="btn btn-info">
+                    Click Me
+                </button>
+            </div>
+            <div id="progress_bars">
+
+            </div>
+        </div>
     </body>
 
 </html>
