@@ -279,7 +279,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
         var progress = function(json) {
             for (var i = 0 ; i < json.length ; i++) {
                 var view = {
-                    label: json[i]['label'],
+                    label: (1 + i) + ') ' + json[i]['label'],
                     id: json[i]['file_name'],
                     id_percentage: json[i]['file_name'] + '_percentage'
                 };
