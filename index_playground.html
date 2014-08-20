@@ -57,15 +57,22 @@
             function progress(json) {
                 for (var i = 0 ; i < json.length ; i++) {
                     var s = '';
-                    s += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">';
-                    s += '<div class="progress">';
-                    s += '<div id="' + json[i]['file_name'] + '" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">';
-                    s += json[i]['file_name'];
+                    s += '<div class="row">';
+                    s += '<div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">';
+                    s += '<b>' + json[i]['label'] + '</b> ';
                     s += '</div>';
+                    s += '<div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">';
+                    s += '<div class="progress">';
+                    s += '<div id="' + json[i]['file_name'] + '" class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">';
+                    s += '</div>';
+                    s += '</div>';
+                    s += '</div>';
+                    s += '<div class="col-xs-12 col-sm-2 col-md-2 col-lg-2" style="text-align: right;">';
+                    s += '<span id="' + json[i]['file_name'] + '_percentage"><i class="fa fa-refresh fa-spin"></i></span>';
                     s += '</div>';
                     s += '</div>';
                     $('#progress_bars').append(s);
-                    if (i == 0) {
+                    if (i < 5) {
                         timers_map[json[i]['file_name']] = setInterval(function (id) {
                             $.ajax({
                                 url: 'http://127.0.0.1:5005/download/progress/' + id + '/',
@@ -73,8 +80,17 @@
                                 success: function (progress) {
                                     $(document.getElementById(id)).attr('aria-valuenow', progress.progress);
                                     $(document.getElementById(id)).css('width', progress.progress + '%');
-                                    if (parseFloat(progress.progress) >= 100)
+                                    if (!isNaN(parseFloat(progress.progress))) {
+                                        var msg = '';
+                                        msg += '[' + (parseFloat(progress.download_size) / 1000000).toFixed(2) + ' / ' + (parseFloat(progress.total_size) / 1000000).toFixed(2) + '] ';
+                                        msg += '<b>' + progress.progress + '%</b>';
+                                        $(document.getElementById(id + '_percentage')).html(msg);
+                                    }
+                                    if (parseFloat(progress.progress) >= 100) {
                                         clearInterval(timers_map[id]);
+                                        $(document.getElementById(id)).removeClass('progress-bar-warning');
+                                        $(document.getElementById(id)).addClass('progress-bar-success');
+                                    }
                                 }
                             });
                         }, 1000, json[i]['file_name']);
@@ -88,14 +104,20 @@
 
     <body>
         <div class="container">
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <button style="width: 100%;" onclick="test();" class="btn btn-info">
-                    Click Me
-                </button>
+            <br>
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <button style="width: 100%;" onclick="test();" class="btn btn-info">
+                        Click Me
+                    </button>
+                </div>
             </div>
-            <div id="progress_bars">
+            <br>
+            <!--<div class="row">-->
+                <div id="progress_bars">
 
-            </div>
+                </div>
+            <!--</div>-->
         </div>
     </body>
 
