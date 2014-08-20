@@ -7,6 +7,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
         var CONFIG = {
             lang:                                   'en',
             url_data_providers:                     'http://127.0.0.1:5005/schema/sources/',
+            url_download:                           'http://127.0.0.1:5005/download/',
             data_provider_config:                   null,
             id_placeholder:                         'main_content_placeholder',
             id_data_providers_placeholder:          'data_providers_placeholder',
@@ -18,7 +19,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             id_download_button_template:            'download_button_template',
             id_buttons_placeholder:                 'buttons_placeholder',
             id_download_tabs_template:              'download_tabs',
-            layers_list:                            []
+            layers_list:                            [],
+            timers_map:                             {}
         };
 
         var init = function(config) {
@@ -206,10 +208,9 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                                 /* Add button to the interface. */
                                 $('#' + CONFIG.id_buttons_placeholder).empty();
                                 $('#' + CONFIG.id_buttons_placeholder).html(render);
-
-                                /* List available layers. */
-                                $('#' + json.id).on('change', function () {
-                                    get_layers_list();
+                                $('#' + CONFIG.id_buttons_placeholder).unbind();
+                                $('#' + CONFIG.id_buttons_placeholder).click(function() {
+                                    download_layers();
                                 });
 
                             }
@@ -223,7 +224,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             });
         };
 
-        var get_layers_list = function() {
+        var download_layers = function() {
 
             /* Fill parameters with values from the drop-downs. */
             if (CONFIG.data_provider_config.services.layers.parameters.length > 0) {
@@ -233,9 +234,82 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     CONFIG.data_provider_config.services.layers.path = CONFIG.data_provider_config.services.layers.path.replace(p, v);
                 }
             }
-            console.log(CONFIG.data_provider_config.services.layers);
-            console.log(CONFIG.data_provider_config.base_url + CONFIG.data_provider_config.services.layers.path);
 
+            /* Build URL. */
+            var url = CONFIG.data_provider_config.base_url + CONFIG.data_provider_config.services.layers.path + '/';
+
+            $.ajax({
+
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+
+                success: function (response) {
+
+                    var data_provider = $('#' + CONFIG.id_data_providers).val().substring(0, $('#' + CONFIG.id_data_providers).val().indexOf('.'));
+                    var json = response;
+                    if (typeof json == 'string')
+                        json = $.parseJSON(response);
+                    var data = {};
+                    data.file_paths_and_sizes = json;
+                    data.filesystem_structure = {
+                        'product': $('#list_products').val(),
+                        'year': $('#list_years_from').val(),
+                        'day': $('#list_days_from').val()
+                    };
+
+                    $.ajax({
+                        url: CONFIG.url_download + data_provider + '/',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: JSON.stringify(data),
+                        contentType: 'application/json',
+                        success: function (response) {
+                            $('#download_tab a[href="#tab_progress"]').tab('show')
+                            progress(json);
+                        }
+                    });
+
+                }
+
+            });
+
+        };
+
+        var progress = function(json) {
+            for (var i = 0 ; i < json.length ; i++) {
+                var view = {
+                    label: json[i]['label'],
+                    id: json[i]['file_name'],
+                    id_percentage: json[i]['file_name'] + '_percentage'
+                };
+                var template = $(templates).filter('#loading_bar_template').html();
+                var render = Mustache.render(template, view);
+                $('#tab_progress').append(render);
+                if (i < 25) {
+                    CONFIG.timers_map[json[i]['file_name']] = setInterval(function (id) {
+                        $.ajax({
+                            url: 'http://127.0.0.1:5005/download/progress/' + id + '/',
+                            type: 'GET',
+                            success: function (progress) {
+                                $(document.getElementById(id)).attr('aria-valuenow', progress.progress);
+                                $(document.getElementById(id)).css('width', progress.progress + '%');
+                                if (!isNaN(parseFloat(progress.progress))) {
+                                    var msg = '';
+                                    msg += '[' + (parseFloat(progress.download_size) / 1000000).toFixed(2) + ' / ' + (parseFloat(progress.total_size) / 1000000).toFixed(2) + '] ';
+                                    msg += '<b>' + progress.progress + '%</b>';
+                                    $(document.getElementById(id + '_percentage')).html(msg);
+                                }
+                                if (parseFloat(progress.progress) >= 100) {
+                                    clearInterval(CONFIG.timers_map[id]);
+                                    $(document.getElementById(id)).removeClass('progress-bar-warning');
+                                    $(document.getElementById(id)).addClass('progress-bar-success');
+                                }
+                            }
+                        });
+                    }, 1000, json[i]['file_name']);
+                }
+            }
         };
 
         return {

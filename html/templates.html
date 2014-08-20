@@ -70,7 +70,7 @@
     Tabs structure for the download module.
 -->
 <div id='download_tabs'>
-    <ul class='nav nav-tabs' role='tablist'>
+    <ul class='nav nav-tabs' role='tablist' id='download_tab'>
         <li class='active'>
             <a role='tab' data-toggle='tab' href='#tab_selectors'>
                 {{selectors_label}}
@@ -89,7 +89,27 @@
             <div id='buttons_placeholder'></div>
         </div>
         <div class='tab-pane' id='tab_progress'>
-            Progress....
+
+        </div>
+    </div>
+</div>
+
+<!--
+    Loading bar template
+-->
+<div id='loading_bar_template'>
+    <div class='row'>
+        <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+            <b>{{label}}</b>
+        </div>
+        <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+            <div class="progress">
+                <div id="{{id}}" class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2" style="text-align: right;">
+            <span id="{{id_percentage}}"><i class="fa fa-refresh fa-spin"></i></span>
         </div>
     </div>
 </div>
