@@ -34,18 +34,21 @@
                     }
                 ];
                 $.ajax({
-                    url: 'http://127.0.0.1:5005/browse/modis/mod13a1/2014/001/',
+                    url: 'http://127.0.0.1:5005/browse/modis/mod13a2/2014/001/',
                     type: 'GET',
                     dataType: 'json',
                     success: function (response) {
                         var json = response;
                         if (typeof json == 'string')
                             json = $.parseJSON(response);
+                        var data = {};
+                        data.file_paths_and_sizes = json;
+                        data.filesystem_structure = {'product': 'MOD13A2', 'year': '2014', 'day': '001'};
                         $.ajax({
                             url: 'http://127.0.0.1:5005/download/modis/',
                             type: 'POST',
                             dataType: 'json',
-                            data: JSON.stringify(json),
+                            data: JSON.stringify(data),
                             contentType: 'application/json',
                             success: function (response) {
                                 progress(json);
