@@ -75,7 +75,7 @@
                     s += '</div>';
                     s += '</div>';
                     $('#progress_bars').append(s);
-                    if (i < 5) {
+                    if (i < 25) {
                         timers_map[json[i]['file_name']] = setInterval(function (id) {
                             $.ajax({
                                 url: 'http://127.0.0.1:5005/download/progress/' + id + '/',
