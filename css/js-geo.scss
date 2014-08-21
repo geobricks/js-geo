@@ -74,6 +74,25 @@ $banner-color:  #379bce;
   line-height: 35px !important;
 }
 
+.chosen-container .chosen-container-multi {
+  height: 35px !important;
+  line-height: 35px !important;
+}
+
+.search-field {
+  .default {
+    height: 35px !important;
+    line-height: 35px !important;
+  }
+}
+
+.chosen-choices {
+  .search-choice {
+    height: 35px !important;
+    line-height: 35px !important;
+  }
+}
+
 .chosen-container-single .chosen-single div {
   top: 6px !important;
 }

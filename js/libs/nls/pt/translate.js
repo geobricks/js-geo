@@ -8,5 +8,6 @@ define({
     'please_select': 'Selecione Por Favor...',
     'download_label': 'Baixar Layer Selecionados',
     'selectors_label': 'Seletores',
-    'progress_label': 'Avanço'
+    'progress_label': 'Avanço',
+    'countries': 'Países'
 });

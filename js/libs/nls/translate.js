@@ -9,7 +9,8 @@ define({
         'please_select': 'Please Select...',
         'download_label': 'Download Selected Layers',
         'selectors_label': 'Selectors',
-        'progress_label': 'Progress'
+        'progress_label': 'Progress',
+        'countries': 'Countries'
     },
     'it' : true,
     'pt' : true

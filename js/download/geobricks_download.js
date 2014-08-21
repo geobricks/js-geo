@@ -20,7 +20,9 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             id_buttons_placeholder:                 'buttons_placeholder',
             id_download_tabs_template:              'download_tabs',
             layers_list:                            [],
-            timers_map:                             {}
+            timers_map:                             {},
+            url_gaul_2_modis:                       'http://127.0.0.1:5005/browse/modis/countries/',
+            id_gaul_2_modis:                        'gaul_2_modis_list'
         };
 
         var init = function(config) {
@@ -82,7 +84,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         /* Load Chosen plug-in. */
                         require(['chosen'], function (translate) {
 
-                            /* Enable Shosen plug-in. */
+                            /* Enable Chosen plug-in. */
                             $('#' + CONFIG.id_data_providers).chosen({disable_search_threshold: 10});
 
                             /* Add change listener. */
@@ -103,9 +105,19 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
         var change_data_provider = function() {
 
+            /* Read data provider. */
+            var data_provider = $('#' + CONFIG.id_data_providers).val();
+
+            /* Add countries for MODIS. */
+            switch (data_provider) {
+                case 'modis.json':
+                    create_modis2gaul_dropdown();
+                    break;
+            }
+
             $.ajax({
 
-                url: CONFIG.url_data_providers + $('#' + CONFIG.id_data_providers).val() + '/',
+                url: CONFIG.url_data_providers + data_provider + '/',
                 type: 'GET',
                 dataType: 'json',
 
@@ -119,6 +131,51 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
                     for (var i = 0 ; i < json.services.filters.length; i++)
                         create_dropdown(json.base_url, json.services.filters[i], i);
+
+                }
+
+            });
+
+        };
+
+        var create_modis2gaul_dropdown = function() {
+
+            $.ajax({
+
+                url: CONFIG.url_gaul_2_modis,
+                type: 'GET',
+                dataType: 'json',
+
+                success: function(response) {
+
+                    /* Load multi-language plug-in. */
+                    require(['i18n!nls/translate'], function (translate) {
+
+                        var json = response;
+                        if (typeof json == 'string')
+                            json = $.parseJSON(response);
+
+                        /* Load template. */
+                        var template;
+                        var view;
+                        template = $(templates).filter('#' + CONFIG.id_multiple_generic_dropdown_template).html();
+                        view = {
+                            multiple_generic_dropdown_label: translate.countries,
+                            multiple_generic_dropdown_id: CONFIG.id_gaul_2_modis,
+                            multiple_generic_dropdown_container_id: CONFIG.id_gaul_2_modis + '_container'
+                        };
+                        var render = Mustache.render(template, view);
+                        $('#' + CONFIG.id_selectors_placeholder).append(render);
+
+                        /* Create drop-down. */
+                        var s = '';
+                        s += '<option value="null">' + translate.please_select + '</option>';
+                        for (var i = 0; i < json.length; i++)
+                            s += '<option value="' + json[i].gaul_code + '">' + json[i].gaul_label + '</option>';
+                        $('#' + CONFIG.id_gaul_2_modis).html(s);
+                        $('#' + CONFIG.id_gaul_2_modis).chosen({disable_search_threshold: 10});
+
+                    });
 
                 }
 
@@ -286,7 +343,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 var template = $(templates).filter('#loading_bar_template').html();
                 var render = Mustache.render(template, view);
                 $('#tab_progress').append(render);
-                if (i < 25) {
+                if (i < 2500) {
                     CONFIG.timers_map[json[i]['file_name']] = setInterval(function (id) {
                         $.ajax({
                             url: 'http://127.0.0.1:5005/download/progress/' + id + '/',
