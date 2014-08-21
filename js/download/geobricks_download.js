@@ -170,8 +170,16 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         /* Create drop-down. */
                         var s = '';
                         s += '<option value="null">' + translate.please_select + '</option>';
-                        for (var i = 0; i < json.length; i++)
-                            s += '<option value="' + json[i].gaul_code + '">' + json[i].gaul_label + '</option>';
+                        for (var i = 0; i < json.length; i++) {
+                            s += '<option value="' + json[i].gaul_code + '" ';
+                            s += 'data-from_h="' + json[i].from_h + '" ';
+                            s += 'data-to_h="' + json[i].to_h + '" ';
+                            s += 'data-from_v="' + json[i].from_v + '" ';
+                            s += 'data-to_v="' + json[i].to_v + '" ';
+                            s += '>';
+                            s += json[i].gaul_label;
+                            s += '</option>';
+                        }
                         $('#' + CONFIG.id_gaul_2_modis).html(s);
                         $('#' + CONFIG.id_gaul_2_modis).chosen({disable_search_threshold: 10});
 
