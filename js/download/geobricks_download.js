@@ -303,6 +303,20 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             /* Build URL. */
             var url = CONFIG.data_provider_config.base_url + CONFIG.data_provider_config.services.layers.path + '/';
 
+            var data_provider = $('#' + CONFIG.id_data_providers).val().substring(0, $('#' + CONFIG.id_data_providers).val().indexOf('.'));
+            switch (data_provider) {
+                case 'modis':
+                    var countries = $('#gaul_2_modis_list').find(':selected');
+                    var from_h = $(countries[0]).data('from_h');
+                    var to_h = $(countries[0]).data('to_h');
+                    var from_v = $(countries[0]).data('from_v');
+                    var to_v = $(countries[0]).data('to_v');
+                    url += from_h + '/';
+                    url += to_h + '/';
+                    url += from_v + '/';
+                    url += to_v + '/';
+            }
+
             $.ajax({
 
                 url: url,
@@ -311,7 +325,6 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
                 success: function (response) {
 
-                    var data_provider = $('#' + CONFIG.id_data_providers).val().substring(0, $('#' + CONFIG.id_data_providers).val().indexOf('.'));
                     var json = response;
                     if (typeof json == 'string')
                         json = $.parseJSON(response);
@@ -367,14 +380,28 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                                 }
                                 if (parseFloat(progress.progress) >= 100) {
                                     clearInterval(CONFIG.timers_map[id]);
+                                    delete CONFIG.timers_map[id];
                                     $(document.getElementById(id)).removeClass('progress-bar-warning');
                                     $(document.getElementById(id)).addClass('progress-bar-success');
+                                    if (Object.keys(CONFIG.timers_map).length == 0)
+                                        processing();
                                 }
                             }
                         });
                     }, 1000, json[i]['file_name']);
                 }
             }
+        };
+
+        var processing = function() {
+            $.ajax({
+                url: 'http://127.0.0.1:5005/browse/modis/process/',
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+                }
+            });
         };
 
         return {
