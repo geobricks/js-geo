@@ -394,14 +394,14 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
         };
 
         var processing = function() {
-            $.ajax({
-                url: 'http://127.0.0.1:5005/browse/modis/process/',
-                type: 'GET',
-                dataType: 'json',
-                success: function (response) {
-                    console.log(response);
-                }
-            });
+//            $.ajax({
+//                url: 'http://127.0.0.1:5005/browse/modis/process/',
+//                type: 'GET',
+//                dataType: 'json',
+//                success: function (response) {
+//                    console.log(response);
+//                }
+//            });
         };
 
         return {
