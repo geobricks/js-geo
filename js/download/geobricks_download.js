@@ -343,8 +343,9 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         data: JSON.stringify(data),
                         contentType: 'application/json',
                         success: function (response) {
+                            CONFIG.source_path = response.source_path
                             $('#download_tab a[href="#tab_progress"]').tab('show')
-                            progress(json);
+                            progress(json, data_provider);
                         }
                     });
 
@@ -354,7 +355,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
         };
 
-        var progress = function(json) {
+        var progress = function(json, data_provider) {
             for (var i = 0 ; i < json.length ; i++) {
                 var view = {
                     label: (1 + i) + ') ' + json[i]['label'],
@@ -384,7 +385,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                                     $(document.getElementById(id)).removeClass('progress-bar-warning');
                                     $(document.getElementById(id)).addClass('progress-bar-success');
                                     if (Object.keys(CONFIG.timers_map).length == 0)
-                                        processing();
+                                        processing(data_provider);
                                 }
                             }
                         });
@@ -393,15 +394,20 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             }
         };
 
-        var processing = function() {
-//            $.ajax({
-//                url: 'http://127.0.0.1:5005/browse/modis/process/',
-//                type: 'GET',
-//                dataType: 'json',
-//                success: function (response) {
-//                    console.log(response);
-//                }
-//            });
+        var processing = function(data_provider) {
+            var data = {};
+            data.source_path = CONFIG.source_path;
+            data.pixel_size = 0.004166665;
+            $.ajax({
+                url: 'http://127.0.0.1:5005/download/process/' + data_provider + '/',
+                type: 'POST',
+                dataType: 'json',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function (response) {
+                    console.log(response);
+                }
+            });
         };
 
         return {
