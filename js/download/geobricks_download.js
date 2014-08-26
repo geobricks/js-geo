@@ -23,7 +23,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             timers_map:                             {},
             url_gaul_2_modis:                       'http://127.0.0.1:5005/browse/modis/countries/',
             id_gaul_2_modis:                        'gaul_2_modis_list',
-            url_progress:                           'http://127.0.0.1:5005/download/progress/'
+            url_progress:                           'http://127.0.0.1:5005/download/progress/',
+            months:                                 []
         };
 
         var init = function(config) {
@@ -34,6 +35,23 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             /* Fetch data providers. */
             init_data_providers();
 
+        };
+
+        var load_month_names = function() {
+            require(['i18n!nls/translate'], function (translate) {
+                CONFIG.months.push(translate.jan);
+                CONFIG.months.push(translate.feb);
+                CONFIG.months.push(translate.mar);
+                CONFIG.months.push(translate.apr);
+                CONFIG.months.push(translate.may);
+                CONFIG.months.push(translate.jun);
+                CONFIG.months.push(translate.jul);
+                CONFIG.months.push(translate.aug);
+                CONFIG.months.push(translate.sep);
+                CONFIG.months.push(translate.oct);
+                CONFIG.months.push(translate.nov);
+                CONFIG.months.push(translate.dec);
+            })
         };
 
         var init_data_providers = function() {
@@ -48,6 +66,9 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
                     /* Load multi-language plug-in. */
                     require(['i18n!nls/translate'], function (translate) {
+
+                        /* Load month names. */
+                        load_month_names();
 
                         /* Convert response in JSON object. */
                         var json = response;
@@ -305,18 +326,11 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             /* Build URL. */
             var url = CONFIG.data_provider_config.base_url + CONFIG.data_provider_config.services.layers.path + '/';
 
+            /* Build countries list, comma separated. */
             var data_provider = $('#' + CONFIG.id_data_providers).val().substring(0, $('#' + CONFIG.id_data_providers).val().indexOf('.'));
             switch (data_provider) {
                 case 'modis':
                     var countries = $('#gaul_2_modis_list').find(':selected');
-//                    var from_h = $(countries[0]).data('from_h');
-//                    var to_h = $(countries[0]).data('to_h');
-//                    var from_v = $(countries[0]).data('from_v');
-//                    var to_v = $(countries[0]).data('to_v');
-//                    url += from_h + '/';
-//                    url += to_h + '/';
-//                    url += from_v + '/';
-//                    url += to_v + '/';
                     var s = '';
                     for (var i = 0 ; i < countries.length ; i++) {
                         s += $(countries[i]).data('gaul_code');
@@ -325,6 +339,29 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     }
                     url += s + '/';
             }
+
+            /* Fetch time interval. */
+            var from_day = parseInt($('#list_days_from').val());
+            var to_day = parseInt($('#list_days_to').val());
+            var total_tabs = 1 + (to_day - from_day) / 16;
+
+            /* Create a tab for each date. */
+            for (var i = 0 ; i < total_tabs ; i++) {
+                var s = '';
+                var day = from_day + i * 16;
+                var d = new Date($('#list_years_from').val(), 0, day);
+                s += d.getDate() + ' ' + CONFIG.months[d.getMonth()];
+                $('#download_tab').append('<li><a role="tab" data-toggle="tab" href="#tab_' + i + '">' + s + '</a></li>');
+                $('#tab_contents').append('<div class="tab-pane" id="tab_' + i + '"><br></div>');
+                init_tab(url, i, d, data_provider);
+            }
+
+        };
+
+        var init_tab = function(url, tab_index, date, data_provider) {
+
+            /* Replace the correct day in the URL. */
+            url = url.replace($('#list_days_from').val(), create_day_of_the_year(date));
 
             $.ajax({
 
@@ -339,11 +376,13 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         json = $.parseJSON(response);
                     var data = {};
                     data.file_paths_and_sizes = json;
+                    data.tab_id = 'tab_' + tab_index;
                     data.filesystem_structure = {
                         'product': $('#list_products').val(),
                         'year': $('#list_years_from').val(),
-                        'day': $('#list_days_from').val()
+                        'day': create_day_of_the_year(date)
                     };
+                    console.log(data);
 
                     $.ajax({
                         url: CONFIG.url_download + data_provider + '/',
@@ -353,8 +392,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         contentType: 'application/json',
                         success: function (response) {
                             CONFIG.source_path = response.source_path
-                            $('#download_tab a[href="#tab_progress"]').tab('show')
-                            progress(json, data_provider);
+                            $('#download_tab a[href="#tab_0"]').tab('show')
+                            progress(json, data_provider, 'tab_' + tab_index);
                         }
                     });
 
@@ -364,8 +403,20 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
         };
 
-        var progress = function(json, data_provider) {
-            clean_progress_tab();
+        var create_day_of_the_year = function(date) {
+            var start = new Date(date.getFullYear(), 0, 0);
+            var diff = date - start;
+            var oneDay = 1000 * 60 * 60 * 24;
+            var day = Math.floor(diff / oneDay);
+            if (day < 10)
+                day = '00' + day;
+            else if (day < 100)
+                day = '0' + day;
+            return day;
+        };
+
+        var progress = function(json, data_provider, tab_id) {
+            clean_progress_tab(tab_id);
             for (var i = 0 ; i < json.length ; i++) {
                 var view = {
                     label: (1 + i) + ') ' + json[i]['label'],
@@ -374,15 +425,17 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 };
                 var template = $(templates).filter('#loading_bar_template').html();
                 var render = Mustache.render(template, view);
-                $('#tab_progress').append(render);
-                setTimeout(init_progress(json[i]['file_name'], data_provider), 5000);
+                $('#' + tab_id).append(render);
+                setTimeout(init_progress(json[i]['file_name'], data_provider, tab_id), 5000);
             }
         };
 
-        var init_progress = function(filename, data_provider) {
-            CONFIG.timers_map[filename] = setInterval(function (id) {
+        var init_progress = function(filename, data_provider, tab_id) {
+            if (CONFIG.timers_map[tab_id] == null)
+                CONFIG.timers_map[tab_id] = {};
+            CONFIG.timers_map[tab_id][filename] = setInterval(function (id) {
                 $.ajax({
-                    url: CONFIG.url_progress + id + '/',
+                    url: CONFIG.url_progress + tab_id + '/' + id + '/',
                     type: 'GET',
                     success: function (progress) {
                         $(document.getElementById(id)).attr('aria-valuenow', progress.progress);
@@ -394,11 +447,11 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             $(document.getElementById(id + '_percentage')).html(msg);
                         }
                         if (parseFloat(progress.progress) >= 100) {
-                            clearInterval(CONFIG.timers_map[id]);
-                            delete CONFIG.timers_map[id];
+                            clearInterval(CONFIG.timers_map[tab_id][id]);
+//                            delete CONFIG.timers_map[tab_id][id];
                             $(document.getElementById(id)).removeClass('progress-bar-warning');
                             $(document.getElementById(id)).addClass('progress-bar-success');
-                            if (Object.keys(CONFIG.timers_map).length == 0)
+                            if (Object.keys(CONFIG.timers_map[tab_id]).length == 0)
                                 processing(data_provider);
                         }
                     }
@@ -406,11 +459,11 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             }, 1000, filename);
         };
 
-        var clean_progress_tab = function() {
-            $('#tab_progress').empty();
-            $('#tab_progress').append('<br>');
-            for (var key in CONFIG.timers_map)
-                delete CONFIG.timers_map[key]
+        var clean_progress_tab = function(tab_id) {
+            $('#' + tab_id).empty();
+            $('#' + tab_id).append('<br>');
+            for (var key in CONFIG.timers_map[tab_id])
+                delete CONFIG.timers_map[tab_id][key]
         };
 
         var processing = function(data_provider) {

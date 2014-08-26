@@ -9,5 +9,17 @@ define({
     'download_label': 'Scarica Layer Selezionati',
     'selectors_label': 'Selettori',
     'progress_label': 'Progresso',
-    'countries': 'Paesi'
+    'countries': 'Paesi',
+    'jan': 'Gennaio',
+    'feb': 'Febbraio',
+    'mar': 'Marzo',
+    'apr': 'Aprile',
+    'may': 'Maggio',
+    'jun': 'Giugno',
+    'jul': 'Luglio',
+    'aug': 'Agosto',
+    'sep': 'Settembre',
+    'oct': 'Ottobre',
+    'nov': 'Novembre',
+    'dec': 'Dicembre'
 });
