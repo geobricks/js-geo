@@ -448,7 +448,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         }
                         if (parseFloat(progress.progress) >= 100) {
                             clearInterval(CONFIG.timers_map[tab_id][id]);
-//                            delete CONFIG.timers_map[tab_id][id];
+                            delete CONFIG.timers_map[tab_id][id];
                             $(document.getElementById(id)).removeClass('progress-bar-warning');
                             $(document.getElementById(id)).addClass('progress-bar-success');
                             if (Object.keys(CONFIG.timers_map[tab_id]).length == 0)
