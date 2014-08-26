@@ -356,6 +356,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
         };
 
         var progress = function(json, data_provider) {
+            $('#tab_progress').empty();
+            $('#tab_progress').append('<br>');
             for (var i = 0 ; i < json.length ; i++) {
                 var view = {
                     label: (1 + i) + ') ' + json[i]['label'],
@@ -365,32 +367,30 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 var template = $(templates).filter('#loading_bar_template').html();
                 var render = Mustache.render(template, view);
                 $('#tab_progress').append(render);
-                if (i < 2500) {
-                    CONFIG.timers_map[json[i]['file_name']] = setInterval(function (id) {
-                        $.ajax({
-                            url: 'http://127.0.0.1:5005/download/progress/' + id + '/',
-                            type: 'GET',
-                            success: function (progress) {
-                                $(document.getElementById(id)).attr('aria-valuenow', progress.progress);
-                                $(document.getElementById(id)).css('width', progress.progress + '%');
-                                if (!isNaN(parseFloat(progress.progress))) {
-                                    var msg = '';
-                                    msg += '[' + (parseFloat(progress.download_size) / 1000000).toFixed(2) + ' / ' + (parseFloat(progress.total_size) / 1000000).toFixed(2) + '] ';
-                                    msg += '<b>' + progress.progress + '%</b>';
-                                    $(document.getElementById(id + '_percentage')).html(msg);
-                                }
-                                if (parseFloat(progress.progress) >= 100) {
-                                    clearInterval(CONFIG.timers_map[id]);
-                                    delete CONFIG.timers_map[id];
-                                    $(document.getElementById(id)).removeClass('progress-bar-warning');
-                                    $(document.getElementById(id)).addClass('progress-bar-success');
-                                    if (Object.keys(CONFIG.timers_map).length == 0)
-                                        processing(data_provider);
-                                }
+                CONFIG.timers_map[json[i]['file_name']] = setInterval(function (id) {
+                    $.ajax({
+                        url: 'http://127.0.0.1:5005/download/progress/' + id + '/',
+                        type: 'GET',
+                        success: function (progress) {
+                            $(document.getElementById(id)).attr('aria-valuenow', progress.progress);
+                            $(document.getElementById(id)).css('width', progress.progress + '%');
+                            if (!isNaN(parseFloat(progress.progress))) {
+                                var msg = '';
+                                msg += '[' + (parseFloat(progress.download_size) / 1000000).toFixed(2) + ' / ' + (parseFloat(progress.total_size) / 1000000).toFixed(2) + '] ';
+                                msg += '<b>' + progress.progress + '%</b>';
+                                $(document.getElementById(id + '_percentage')).html(msg);
                             }
-                        });
-                    }, 1000, json[i]['file_name']);
-                }
+                            if (parseFloat(progress.progress) >= 100) {
+                                clearInterval(CONFIG.timers_map[id]);
+                                delete CONFIG.timers_map[id];
+                                $(document.getElementById(id)).removeClass('progress-bar-warning');
+                                $(document.getElementById(id)).addClass('progress-bar-success');
+                                if (Object.keys(CONFIG.timers_map).length == 0)
+                                    processing(data_provider);
+                            }
+                        }
+                    });
+                }, 1000, json[i]['file_name']);
             }
         };
 
