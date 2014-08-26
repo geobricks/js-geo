@@ -177,6 +177,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             s += 'data-to_h="' + json[i].to_h + '" ';
                             s += 'data-from_v="' + json[i].from_v + '" ';
                             s += 'data-to_v="' + json[i].to_v + '" ';
+                            s += 'data-gaul_code="' + json[i].gaul_code + '" ';
                             s += '>';
                             s += json[i].gaul_label;
                             s += '</option>';
@@ -308,14 +309,21 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             switch (data_provider) {
                 case 'modis':
                     var countries = $('#gaul_2_modis_list').find(':selected');
-                    var from_h = $(countries[0]).data('from_h');
-                    var to_h = $(countries[0]).data('to_h');
-                    var from_v = $(countries[0]).data('from_v');
-                    var to_v = $(countries[0]).data('to_v');
-                    url += from_h + '/';
-                    url += to_h + '/';
-                    url += from_v + '/';
-                    url += to_v + '/';
+//                    var from_h = $(countries[0]).data('from_h');
+//                    var to_h = $(countries[0]).data('to_h');
+//                    var from_v = $(countries[0]).data('from_v');
+//                    var to_v = $(countries[0]).data('to_v');
+//                    url += from_h + '/';
+//                    url += to_h + '/';
+//                    url += from_v + '/';
+//                    url += to_v + '/';
+                    var s = '';
+                    for (var i = 0 ; i < countries.length ; i++) {
+                        s += $(countries[i]).data('gaul_code');
+                        if (i < countries.length - 1)
+                            s += ',';
+                    }
+                    url += s + '/';
             }
 
             $.ajax({
@@ -367,12 +375,11 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 var template = $(templates).filter('#loading_bar_template').html();
                 var render = Mustache.render(template, view);
                 $('#tab_progress').append(render);
-                setTimeout(init_progress(json[i]['file_name']), 5000);
+                setTimeout(init_progress(json[i]['file_name'], data_provider), 5000);
             }
         };
 
-        var init_progress = function(filename) {
-            console.log('init progress for ' + filename + ' @ ' + (new Date().getTime()));
+        var init_progress = function(filename, data_provider) {
             CONFIG.timers_map[filename] = setInterval(function (id) {
                 $.ajax({
                     url: CONFIG.url_progress + id + '/',
