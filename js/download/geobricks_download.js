@@ -22,7 +22,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             layers_list:                            [],
             timers_map:                             {},
             url_gaul_2_modis:                       'http://127.0.0.1:5005/browse/modis/countries/',
-            id_gaul_2_modis:                        'gaul_2_modis_list'
+            id_gaul_2_modis:                        'gaul_2_modis_list',
+            url_progress:                           'http://127.0.0.1:5005/download/progress/'
         };
 
         var init = function(config) {
@@ -356,8 +357,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
         };
 
         var progress = function(json, data_provider) {
-            $('#tab_progress').empty();
-            $('#tab_progress').append('<br>');
+            clean_progress_tab();
             for (var i = 0 ; i < json.length ; i++) {
                 var view = {
                     label: (1 + i) + ') ' + json[i]['label'],
@@ -367,31 +367,43 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 var template = $(templates).filter('#loading_bar_template').html();
                 var render = Mustache.render(template, view);
                 $('#tab_progress').append(render);
-                CONFIG.timers_map[json[i]['file_name']] = setInterval(function (id) {
-                    $.ajax({
-                        url: 'http://127.0.0.1:5005/download/progress/' + id + '/',
-                        type: 'GET',
-                        success: function (progress) {
-                            $(document.getElementById(id)).attr('aria-valuenow', progress.progress);
-                            $(document.getElementById(id)).css('width', progress.progress + '%');
-                            if (!isNaN(parseFloat(progress.progress))) {
-                                var msg = '';
-                                msg += '[' + (parseFloat(progress.download_size) / 1000000).toFixed(2) + ' / ' + (parseFloat(progress.total_size) / 1000000).toFixed(2) + '] ';
-                                msg += '<b>' + progress.progress + '%</b>';
-                                $(document.getElementById(id + '_percentage')).html(msg);
-                            }
-                            if (parseFloat(progress.progress) >= 100) {
-                                clearInterval(CONFIG.timers_map[id]);
-                                delete CONFIG.timers_map[id];
-                                $(document.getElementById(id)).removeClass('progress-bar-warning');
-                                $(document.getElementById(id)).addClass('progress-bar-success');
-                                if (Object.keys(CONFIG.timers_map).length == 0)
-                                    processing(data_provider);
-                            }
-                        }
-                    });
-                }, 1000, json[i]['file_name']);
+                setTimeout(init_progress(json[i]['file_name']), 5000);
             }
+        };
+
+        var init_progress = function(filename) {
+            console.log('init progress for ' + filename + ' @ ' + (new Date().getTime()));
+            CONFIG.timers_map[filename] = setInterval(function (id) {
+                $.ajax({
+                    url: CONFIG.url_progress + id + '/',
+                    type: 'GET',
+                    success: function (progress) {
+                        $(document.getElementById(id)).attr('aria-valuenow', progress.progress);
+                        $(document.getElementById(id)).css('width', progress.progress + '%');
+                        if (!isNaN(parseFloat(progress.progress))) {
+                            var msg = '';
+                            msg += '[' + (parseFloat(progress.download_size) / 1000000).toFixed(2) + ' / ' + (parseFloat(progress.total_size) / 1000000).toFixed(2) + '] ';
+                            msg += '<b>' + progress.progress + '%</b>';
+                            $(document.getElementById(id + '_percentage')).html(msg);
+                        }
+                        if (parseFloat(progress.progress) >= 100) {
+                            clearInterval(CONFIG.timers_map[id]);
+                            delete CONFIG.timers_map[id];
+                            $(document.getElementById(id)).removeClass('progress-bar-warning');
+                            $(document.getElementById(id)).addClass('progress-bar-success');
+                            if (Object.keys(CONFIG.timers_map).length == 0)
+                                processing(data_provider);
+                        }
+                    }
+                });
+            }, 1000, filename);
+        };
+
+        var clean_progress_tab = function() {
+            $('#tab_progress').empty();
+            $('#tab_progress').append('<br>');
+            for (var key in CONFIG.timers_map)
+                delete CONFIG.timers_map[key]
         };
 
         var processing = function(data_provider) {
