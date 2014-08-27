@@ -129,6 +129,10 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
         var change_data_provider = function() {
 
+            /* Clean the area. */
+            $('#selectors_placeholder').empty();
+            $('#gaul2modis_placeholder').empty();
+
             /* Read data provider. */
             var data_provider = $('#' + CONFIG.id_data_providers).val();
 
@@ -164,6 +168,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
         var create_modis2gaul_dropdown = function() {
 
+            $('#gaul2modis_placeholder').empty();
+
             $.ajax({
 
                 url: CONFIG.url_gaul_2_modis,
@@ -189,8 +195,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             multiple_generic_dropdown_container_id: CONFIG.id_gaul_2_modis + '_container'
                         };
                         var render = Mustache.render(template, view);
-//                        $('#' + CONFIG.id_selectors_placeholder).append(render);
-                        $('#data_providers_placeholder').append(render);
+                        $('#gaul2modis_placeholder').append(render);
 
                         /* Create drop-down. */
                         var s = '';
@@ -254,6 +259,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             view = {
                                 single_generic_dropdown_label: json.description[CONFIG.lang],
                                 single_generic_dropdown_id: json.id,
+                                single_generic_dropdown_label_id: json.id + '_label',
                                 single_generic_dropdown_container_id: json.id + '_container'
                             };
                         } else if (json.selection_type == 'multiple') {
@@ -261,11 +267,11 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             view = {
                                 multiple_generic_dropdown_label: json.description[CONFIG.lang],
                                 multiple_generic_dropdown_id: json.id,
+                                multiple_generic_dropdown_label_id: json.id + '_label',
                                 multiple_generic_dropdown_container_id: json.id + '_container'
                             };
                         }
                         var render = Mustache.render(template, view);
-//                        $('#' + CONFIG.id_selectors_placeholder).append(render);
                         $('#' + random_id).html(render);
 
                         /* Create drop-down. */
@@ -285,8 +291,12 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             /* Add change listener. */
                             if (json.services != null) {
                                 $('#' + json.id).on('change', function () {
-                                    for (var z = 0; z < json.services.length; z++)
+                                    for (var z = 0; z < json.services.length; z++) {
+                                        $('#' + json.services[z].id).remove();
+                                        $('#' + json.services[z].id + '_chosen').remove();
+                                        $('#' + json.services[z].id + '_label').remove();
                                         create_dropdown(base_url, json.services[z], z);
+                                    }
                                 });
                             }
 

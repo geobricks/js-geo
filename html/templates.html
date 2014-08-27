@@ -80,6 +80,7 @@
     <div class='tab-content' id='tab_contents'>
         <div class='tab-pane active' id='tab_selectors'>
             <div id='data_providers_placeholder'></div>
+            <div id='gaul2modis_placeholder'></div>
             <div id='selectors_placeholder'></div>
             <div id='buttons_placeholder'></div>
         </div>
@@ -185,9 +186,9 @@
 -->
 <div id='single_generic_dropdown_template'>
     <div id='{{single_generic_dropdown_container_id}}'>
-        <div class='row' style='margin-top: 20px;'>
+        <div class='row'>
             <div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
-                <label for='{{single_generic_dropdown_id}}'>
+                <label for='{{single_generic_dropdown_id}}' id={{single_generic_dropdown_label_id}}>
                     {{single_generic_dropdown_label}}
                 </label>
                 <select id='{{single_generic_dropdown_id}}' style='width: 100%;'>
@@ -202,9 +203,9 @@
 -->
 <div id='multiple_generic_dropdown_template'>
     <div id='{{multiple_generic_dropdown_container_id}}'>
-        <div class='row' style='margin-top: 20px;'>
+        <div class='row'>
             <div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
-                <label for='{{multiple_generic_dropdown_id}}'>
+                <label for='{{multiple_generic_dropdown_id}}' id={{multiple_generic_dropdown_label_id}}>
                     {{multiple_generic_dropdown_label}}
                 </label>
                 <select multiple='' id='{{multiple_generic_dropdown_id}}' style='width: 100%;'>
