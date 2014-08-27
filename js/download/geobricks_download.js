@@ -8,7 +8,9 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             lang:                                   'en',
             url_data_providers:                     'http://127.0.0.1:5005/schema/sources/',
             url_download:                           'http://127.0.0.1:5005/download/',
-            data_provider_config:                   null,
+            url_processing:                         'http://127.0.0.1:5005/download/process/',
+            url_gaul_2_modis:                       'http://127.0.0.1:5005/browse/modis/countries/',
+            url_progress:                           'http://127.0.0.1:5005/download/progress/',
             id_placeholder:                         'main_content_placeholder',
             id_data_providers_placeholder:          'data_providers_placeholder',
             id_data_providers_template:             'data_providers_template',
@@ -19,13 +21,12 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             id_download_button_template:            'download_button_template',
             id_buttons_placeholder:                 'buttons_placeholder',
             id_download_tabs_template:              'download_tabs',
+            id_gaul_2_modis:                        'gaul_2_modis_list',
             layers_list:                            [],
             timers_map:                             {},
-            url_gaul_2_modis:                       'http://127.0.0.1:5005/browse/modis/countries/',
-            id_gaul_2_modis:                        'gaul_2_modis_list',
-            url_progress:                           'http://127.0.0.1:5005/download/progress/',
             months:                                 [],
-            source_paths:                           []
+            source_paths:                           [],
+            data_provider_config:                   null
         };
 
         var init = function(config) {
@@ -343,16 +344,33 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
             /* Fetch time interval. */
             var from_day = parseInt($('#list_days_from').val());
-            var to_day = parseInt($('#list_days_to').val());
+            var to_day = null;
+            try {
+                to_day = parseInt($('#list_days_to').val());
+            } catch (e) {
+                to_day = from_day;
+            }
             var total_tabs = 1 + (to_day - from_day) / 16;
+
+            /* Clear existing tabs and timers. */
+            for (var key in CONFIG.timers_map) {
+                for (var key2 in CONFIG.timers_map[key])
+                    clearInterval(CONFIG.timers_map[key][key2]);
+                delete CONFIG.timers_map[key];
+            }
+            var lis = $('#download_tab').children('li');
+            if (lis.length > 0)
+                for (var i = 1 ; i < lis.length ; i++)
+                    $(lis[i]).remove();
+            $('#download_tab a:first').tab('show');
 
             /* Create a tab for each date. */
             for (var i = 0 ; i < total_tabs ; i++) {
                 var s = '';
                 var day = from_day + i * 16;
                 var d = new Date(parseInt($('#list_years_from').val()), 0, day);
-                s += d.getDate() + ' ' + CONFIG.months[d.getMonth()];
-                $('#download_tab').append('<li><a role="tab" data-toggle="tab" href="#tab_' + i + '">' + s + '</a></li>');
+                s += d.getDate() + ' ' + CONFIG.months[d.getMonth()] + ' ' + $('#list_years_from').val();
+                $('#download_tab').append('<li id="' + i + '_li"><a role="tab" data-toggle="tab" href="#tab_' + i + '">' + s + '</a></li>');
                 $('#tab_contents').append('<div class="tab-pane" id="tab_' + i + '"><br></div>');
                 init_tab(url, i, d, data_provider);
             }
@@ -465,13 +483,12 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
         };
 
         var processing = function(data_provider, fake) {
-            console.log(CONFIG.source_paths);
             for (var i = 0 ; i < CONFIG.source_paths.length ; i++) {
                 var data = {};
                 data.source_path = CONFIG.source_paths[i];
                 data.pixel_size = 0.004166665;
                 $.ajax({
-                    url: 'http://127.0.0.1:5005/download/process/' + data_provider + '/',
+                    url: CONFIG.url_processing + data_provider + '/',
                     type: 'POST',
                     dataType: 'json',
                     data: JSON.stringify(data),
