@@ -189,7 +189,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             multiple_generic_dropdown_container_id: CONFIG.id_gaul_2_modis + '_container'
                         };
                         var render = Mustache.render(template, view);
-                        $('#' + CONFIG.id_selectors_placeholder).append(render);
+//                        $('#' + CONFIG.id_selectors_placeholder).append(render);
+                        $('#data_providers_placeholder').append(render);
 
                         /* Create drop-down. */
                         var s = '';
@@ -226,6 +227,9 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 }
             }
 
+            var random_id = create_random_id();
+            $('#' + CONFIG.id_selectors_placeholder).append('<div id="' + random_id + '"><i class="fa fa-refresh fa-spin"></i></div>');
+
             $.ajax({
 
                 url: base_url + json.path + '/',
@@ -261,7 +265,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             };
                         }
                         var render = Mustache.render(template, view);
-                        $('#' + CONFIG.id_selectors_placeholder).append(render);
+//                        $('#' + CONFIG.id_selectors_placeholder).append(render);
+                        $('#' + random_id).html(render);
 
                         /* Create drop-down. */
                         var s = '';
@@ -500,8 +505,13 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             }
         };
 
+        var create_random_id = function() {
+            return 'placeholder_' + parseInt(1000000 * Math.random());
+        };
+
         return {
-            init: init
+            init: init,
+            create_random_id: create_random_id
         };
 
     };
