@@ -24,7 +24,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             url_gaul_2_modis:                       'http://127.0.0.1:5005/browse/modis/countries/',
             id_gaul_2_modis:                        'gaul_2_modis_list',
             url_progress:                           'http://127.0.0.1:5005/download/progress/',
-            months:                                 []
+            months:                                 [],
+            source_paths:                           []
         };
 
         var init = function(config) {
@@ -390,9 +391,9 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         data: JSON.stringify(data),
                         contentType: 'application/json',
                         success: function (response) {
-                            CONFIG.source_path = response.source_path
-                            $('#download_tab a[href="#tab_0"]').tab('show')
-                            progress(json, data_provider, 'tab_' + tab_index);
+                            $('#download_tab a[href="#tab_0"]').tab('show');
+                            CONFIG.source_paths.push(response.source_path);
+                            progress(json, data_provider, 'tab_' + tab_index, response.source_path);
                         }
                     });
 
@@ -412,7 +413,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             return day;
         };
 
-        var progress = function(json, data_provider, tab_id) {
+        var progress = function(json, data_provider, tab_id, source_path) {
             clean_progress_tab(tab_id);
             for (var i = 0 ; i < json.length ; i++) {
                 var view = {
@@ -423,11 +424,11 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 var template = $(templates).filter('#loading_bar_template').html();
                 var render = Mustache.render(template, view);
                 $('#' + tab_id).append(render);
-                setTimeout(init_progress(json[i]['file_name'], data_provider, tab_id), 5000);
+                setTimeout(init_progress(json[i]['file_name'], data_provider, tab_id, source_path), 5000);
             }
         };
 
-        var init_progress = function(filename, data_provider, tab_id) {
+        var init_progress = function(filename, data_provider, tab_id, source_path) {
             if (CONFIG.timers_map[tab_id] == null)
                 CONFIG.timers_map[tab_id] = {};
             CONFIG.timers_map[tab_id][filename] = setInterval(function (id) {
@@ -449,7 +450,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             $(document.getElementById(id)).removeClass('progress-bar-warning');
                             $(document.getElementById(id)).addClass('progress-bar-success');
                             if (Object.keys(CONFIG.timers_map[tab_id]).length == 0)
-                                processing(data_provider);
+                                processing(data_provider, source_path);
                         }
                     }
                 });
@@ -463,20 +464,23 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 delete CONFIG.timers_map[tab_id][key]
         };
 
-        var processing = function(data_provider) {
-            var data = {};
-            data.source_path = CONFIG.source_path;
-            data.pixel_size = 0.004166665;
-            $.ajax({
-                url: 'http://127.0.0.1:5005/download/process/' + data_provider + '/',
-                type: 'POST',
-                dataType: 'json',
-                data: JSON.stringify(data),
-                contentType: 'application/json',
-                success: function (response) {
-                    console.log(response);
-                }
-            });
+        var processing = function(data_provider, fake) {
+            console.log(CONFIG.source_paths);
+            for (var i = 0 ; i < CONFIG.source_paths.length ; i++) {
+                var data = {};
+                data.source_path = CONFIG.source_paths[i];
+                data.pixel_size = 0.004166665;
+                $.ajax({
+                    url: 'http://127.0.0.1:5005/download/process/' + data_provider + '/',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        console.log(response);
+                    }
+                });
+            }
         };
 
         return {
