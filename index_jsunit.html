@@ -1,0 +1,57 @@
+<html>
+
+    <head>
+
+        <title>JS Geo</title>
+
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+
+        <link href='http://fonts.googleapis.com/css?family=Roboto:400,900,700|Roboto+Condensed:400,300,700' rel='stylesheet' type='text/css'>
+
+        <link rel="stylesheet" href="http://fenixapps.fao.org/repository/js/leaflet/0.7.2/leaflet.css" />
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="http://fenixapps.fao.org/repository/css/jquery.power.tip/1.1.0/jquery.powertip.css" type="text/css" />
+        <link rel="stylesheet" href="http://fenixapps.fao.org/repository/js/jquery-ui/1.10.3/jquery-ui-1.10.3.custom.min.css" />
+        <link rel="stylesheet" href="http://localhost:7070/fenix-map-js/fenix-map-js.css" />
+        <link rel="stylesheet" href="http://localhost:7070/fenix-map-js/leaflet-custom.css" />
+
+        <link rel='icon' type='image/png' href='http://fenixapps.fao.org/repository/favicon/faostat.png'>
+        <link href='http://netdna.bootstrapcdn.com/bootstrap/3.0.1/css/bootstrap.min.css' rel='stylesheet'>
+        <link href='http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css' rel='stylesheet'>
+        <link href='http://fenixapps.fao.org/repository/js/chosen/1.0.0/chosen.min.css' rel='stylesheet'>
+        <link href='css/js-geo.css' rel='stylesheet'>
+
+        <script type='text/javascript' src='http://code.jquery.com/jquery-1.10.1.min.js'></script>
+
+        <script type="application/javascript">
+            function test() {
+                var year = parseInt('2014');
+                var from_day = parseInt('177');
+                var total_tabs = 3;
+                for (var i = 0 ; i < total_tabs ; i++) {
+                    var day = from_day + i * 16;
+                    console.log(day);
+                    var date = new Date(year, 0, day);
+                    console.log(date);
+                    var start = new Date(date.getFullYear(), 0, 1);
+                    var day2 = 1 + Math.ceil((date - start) / 86400000);
+                    if (day2 < 10)
+                        day2 = '00' + day2;
+                    else if (day < 100)
+                        day2 = '0' + day2;
+                    console.log(day2);
+                    console.log();
+                }
+            }
+            function doy2date(doy) {
+
+            }
+        </script>
+
+    </head>
+
+    <body onload='test();'>
+
+    </body>
+
+</html>

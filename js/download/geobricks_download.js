@@ -349,7 +349,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             for (var i = 0 ; i < total_tabs ; i++) {
                 var s = '';
                 var day = from_day + i * 16;
-                var d = new Date($('#list_years_from').val(), 0, day);
+                var d = new Date(parseInt($('#list_years_from').val()), 0, day);
                 s += d.getDate() + ' ' + CONFIG.months[d.getMonth()];
                 $('#download_tab').append('<li><a role="tab" data-toggle="tab" href="#tab_' + i + '">' + s + '</a></li>');
                 $('#tab_contents').append('<div class="tab-pane" id="tab_' + i + '"><br></div>');
@@ -382,7 +382,6 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         'year': $('#list_years_from').val(),
                         'day': create_day_of_the_year(date)
                     };
-                    console.log(data);
 
                     $.ajax({
                         url: CONFIG.url_download + data_provider + '/',
@@ -404,10 +403,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
         };
 
         var create_day_of_the_year = function(date) {
-            var start = new Date(date.getFullYear(), 0, 0);
-            var diff = date - start;
-            var oneDay = 1000 * 60 * 60 * 24;
-            var day = Math.floor(diff / oneDay);
+            var start = new Date(date.getFullYear(), 0, 1);
+            var day = 1 + Math.ceil((date - start) / 86400000);
             if (day < 10)
                 day = '00' + day;
             else if (day < 100)
