@@ -102,7 +102,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         var s = '';
                         s += '<option value="null">' + translate.please_select + '</option>';
                         for (var i = 0; i < json.length; i++)
-                            s += '<option value="' + json[i].code + '">' + json[i].label + '</option>';
+                            s += '<option value="' + json[i].code + '">' + json[i].label.toUpperCase() + '</option>';
                         $('#' + CONFIG.id_data_providers).html(s);
 
                         /* Load Chosen plug-in. */
@@ -277,8 +277,15 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         /* Create drop-down. */
                         var s = '';
                         s += '<option value="null">' + translate.please_select + '</option>';
-                        for (var i = 0; i < inner_json.length; i++)
-                            s += '<option value="' + inner_json[i][json.payload.id] + '">' + inner_json[i][json.payload.label] + '</option>';
+                        if (inner_json[0].modis_data_product != null) {
+                            for (var i = 0; i < inner_json.length; i++) {
+                                var lbl = inner_json[i].code + ': ' + inner_json[i].modis_data_product + ' (' + inner_json[i].spatial_resolution + ', ' + inner_json[i].temporal_resolution + ')';
+                                s += '<option value="' + inner_json[i].code + '">' + lbl + '</option>';
+                            }
+                        } else {
+                            for (var i = 0; i < inner_json.length; i++)
+                                s += '<option value="' + inner_json[i][json.payload.id] + '">' + inner_json[i][json.payload.label] + '</option>';
+                        }
 
                         $('#' + json.id).html(s);
 
