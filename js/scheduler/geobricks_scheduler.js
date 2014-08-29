@@ -345,7 +345,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             if (CONFIG.data_provider_config.services.layers.parameters.length > 0) {
                 for (var i = 0 ; i < CONFIG.data_provider_config.services.layers.parameters.length ; i++) {
                     var p = '{' + CONFIG.data_provider_config.services.layers.parameters[i].parameter_name + '}';
-                    var v = $('#' + CONFIG.data_provider_config.services.layers.parameters[i].parameter_value).val()
+                    var v = $('#' + CONFIG.data_provider_config.services.layers.parameters[i].parameter_value).val();
                     CONFIG.data_provider_config.services.layers.path = CONFIG.data_provider_config.services.layers.path.replace(p, v);
                 }
             }
@@ -404,7 +404,11 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
         var init_tab = function(url, tab_index, date) {
 
             /* Replace the correct day in the URL. */
-            url = url.replace($('#list_days_from').val(), create_day_of_the_year(date));
+            switch (CONFIG.data_provider) {
+                case 'modis':
+                    url = url.replace($('#list_days_from').val(), create_day_of_the_year(date));
+                    break;
+            }
 
             $.ajax({
 
