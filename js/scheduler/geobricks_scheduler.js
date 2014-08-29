@@ -26,6 +26,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             timers_map:                             {},
             months:                                 [],
             source_paths:                           {},
+            data_provider:                          null,
+            data_provider_filename:                 null,
             data_provider_config:                   null
         };
 
@@ -134,18 +136,19 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             $('#gaul2modis_placeholder').empty();
 
             /* Read data provider. */
-            var data_provider = $('#' + CONFIG.id_data_providers).val();
+            CONFIG.data_provider_filename = $('#' + CONFIG.id_data_providers).val();
+            CONFIG.data_provider = CONFIG.data_provider_filename.substring(0, CONFIG.data_provider_filename.indexOf('.json'));
 
             /* Add countries for MODIS. */
-            switch (data_provider) {
-                case 'modis.json':
+            switch (CONFIG.data_provider) {
+                case 'modis':
                     create_modis2gaul_dropdown();
                     break;
             }
 
             $.ajax({
 
-                url: CONFIG.url_data_providers + data_provider + '/',
+                url: CONFIG.url_data_providers + CONFIG.data_provider_filename + '/',
                 type: 'GET',
                 dataType: 'json',
 
@@ -233,7 +236,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             }
 
             var random_id = create_random_id();
-            $('#' + CONFIG.id_selectors_placeholder).append('<div id="' + random_id + '"><i class="fa fa-refresh fa-spin"></i></div>');
+            $('#' + CONFIG.id_selectors_placeholder).append('<div id="' + random_id + '"><i style="margin-top: 16px;" class="fa fa-refresh fa-spin"></i></div>');
 
             $.ajax({
 
@@ -351,8 +354,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             var url = CONFIG.data_provider_config.base_url + CONFIG.data_provider_config.services.layers.path + '/';
 
             /* Build countries list, comma separated. */
-            var data_provider = $('#' + CONFIG.id_data_providers).val().substring(0, $('#' + CONFIG.id_data_providers).val().indexOf('.'));
-            switch (data_provider) {
+            switch (CONFIG.data_provider) {
                 case 'modis':
                     var countries = $('#gaul_2_modis_list').find(':selected');
                     var s = '';
@@ -394,12 +396,12 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 s += d.getDate() + ' ' + CONFIG.months[d.getMonth()] + ' ' + $('#list_years_from').val();
                 $('#download_tab').append('<li id="' + i + '_li"><a role="tab" data-toggle="tab" href="#tab_' + i + '">' + s + '</a></li>');
                 $('#tab_contents').append('<div class="tab-pane" id="tab_' + i + '"><br></div>');
-                init_tab(url, i, d, data_provider);
+                init_tab(url, i, d);
             }
 
         };
 
-        var init_tab = function(url, tab_index, date, data_provider) {
+        var init_tab = function(url, tab_index, date) {
 
             /* Replace the correct day in the URL. */
             url = url.replace($('#list_days_from').val(), create_day_of_the_year(date));
@@ -425,7 +427,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     };
 
                     $.ajax({
-                        url: CONFIG.url_download + data_provider + '/',
+                        url: CONFIG.url_download + CONFIG.data_provider + '/',
                         type: 'POST',
                         dataType: 'json',
                         data: JSON.stringify(data),
@@ -433,7 +435,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         success: function (response) {
                             $('#download_tab a[href="#tab_0"]').tab('show');
                             CONFIG.source_paths['tab_' + tab_index] = response.source_path;
-                            progress(json, data_provider, 'tab_' + tab_index);
+                            progress(json, 'tab_' + tab_index);
                         }
                     });
 
@@ -453,7 +455,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             return day;
         };
 
-        var progress = function(json, data_provider, tab_id) {
+        var progress = function(json, tab_id) {
             clean_progress_tab(tab_id);
             for (var i = 0 ; i < json.length ; i++) {
                 var view = {
@@ -464,12 +466,12 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 var template = $(templates).filter('#loading_bar_template').html();
                 var render = Mustache.render(template, view);
                 $('#' + tab_id).append(render);
-                setTimeout(init_progress(json[i]['file_name'], data_provider, tab_id), 5000);
+                setTimeout(init_progress(json[i]['file_name'], tab_id), 5000);
             }
             $('#' + tab_id).append('<div id="' + tab_id + '_processing_result">Processing Result</div>');
         };
 
-        var init_progress = function(filename, data_provider, tab_id) {
+        var init_progress = function(filename, tab_id) {
             if (CONFIG.timers_map[tab_id] == null)
                 CONFIG.timers_map[tab_id] = {};
             CONFIG.timers_map[tab_id][filename] = setInterval(function (id) {
@@ -491,7 +493,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             $(document.getElementById(id)).removeClass('progress-bar-warning');
                             $(document.getElementById(id)).addClass('progress-bar-success');
                             if (Object.keys(CONFIG.timers_map[tab_id]).length == 0)
-                                processing(data_provider, tab_id);
+                                processing(tab_id);
                         }
                     }
                 });
@@ -505,12 +507,12 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 delete CONFIG.timers_map[tab_id][key]
         };
 
-        var processing = function (data_provider, tab_id) {
+        var processing = function (tab_id) {
             var data = {};
             data.source_path = CONFIG.source_paths[tab_id];
             data.pixel_size = 0.004166665;
             $.ajax({
-                url: CONFIG.url_processing + data_provider + '/',
+                url: CONFIG.url_processing + CONFIG.data_provider + '/',
                 type: 'POST',
                 dataType: 'json',
                 data: JSON.stringify(data),
