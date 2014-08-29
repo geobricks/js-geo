@@ -367,14 +367,24 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             }
 
             /* Fetch time interval. */
-            var from_day = parseInt($('#list_days_from').val());
+            var total_tabs = null;
+            var from_day = null;
             var to_day = null;
-            try {
-                to_day = parseInt($('#list_days_to').val());
-            } catch (e) {
-                to_day = from_day;
+            switch (CONFIG.data_provider) {
+                case 'modis':
+                    try {
+                        to_day = parseInt($('#list_days_to').val());
+                    } catch (e) {
+                        to_day = from_day;
+                    }
+                    total_tabs = 1 + (to_day - from_day) / 16;
+                    break;
+                case 'trmm2':
+                    from_day = parseInt($('#list_days_from').val());
+                    to_day = parseInt($('#list_days_to').val());
+                    total_tabs = 1 + (to_day - from_day);
+                    break;
             }
-            var total_tabs = 1 + (to_day - from_day) / 16;
 
             /* Clear existing tabs and timers. */
             for (var key in CONFIG.timers_map) {
@@ -390,13 +400,27 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
             /* Create a tab for each date. */
             for (var i = 0 ; i < total_tabs ; i++) {
-                var s = '';
-                var day = from_day + i * 16;
-                var d = new Date(parseInt($('#list_years_from').val()), 0, day);
-                s += d.getDate() + ' ' + CONFIG.months[d.getMonth()] + ' ' + $('#list_years_from').val();
-                $('#download_tab').append('<li id="' + i + '_li"><a role="tab" data-toggle="tab" href="#tab_' + i + '">' + s + '</a></li>');
-                $('#tab_contents').append('<div class="tab-pane" id="tab_' + i + '"><br></div>');
-                init_tab(url, i, d);
+                switch (CONFIG.data_provider) {
+                    case 'modis':
+                        var s = '';
+                        var day = from_day + i * 16;
+                        var d = new Date(parseInt($('#list_years_from').val()), 0, day);
+                        s += d.getDate() + ' ' + CONFIG.months[d.getMonth()] + ' ' + $('#list_years_from').val();
+                        $('#download_tab').append('<li id="' + i + '_li"><a role="tab" data-toggle="tab" href="#tab_' + i + '">' + s + '</a></li>');
+                        $('#tab_contents').append('<div class="tab-pane" id="tab_' + i + '"><br></div>');
+                        init_tab(url, i, d);
+                        break;
+                    case 'trmm2':
+                        var year = parseInt($('#list_years').val());
+                        var month = parseInt($('#list_months').val()) - 1;
+                        var day = from_day + i;
+                        var d = new Date(year, month, day);
+                        s = day + ' ' + CONFIG.months[d.getMonth()] + ' ' + year;
+                        $('#download_tab').append('<li id="' + i + '_li"><a role="tab" data-toggle="tab" href="#tab_' + i + '">' + s + '</a></li>');
+                        $('#tab_contents').append('<div class="tab-pane" id="tab_' + i + '"><br></div>');
+                        init_tab(url, i, d);
+                        break;
+                }
             }
 
         };
@@ -424,11 +448,24 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     var data = {};
                     data.file_paths_and_sizes = json;
                     data.tab_id = 'tab_' + tab_index;
-                    data.filesystem_structure = {
-                        'product': $('#list_products').val(),
-                        'year': $('#list_years_from').val(),
-                        'day': create_day_of_the_year(date)
-                    };
+                    switch (CONFIG.data_provider) {
+                        case 'modis':
+                            data.filesystem_structure = {
+                                'product': $('#list_products').val(),
+                                'year': $('#list_years_from').val(),
+                                'day': create_day_of_the_year(date)
+                            };
+                            break;
+                        case 'trmm2':
+                            var day = date.getDay() < 10 ? ('0' + date.getDay()) : date.getDay();
+                            data.filesystem_structure = {
+                                'year': $('#list_years').val(),
+                                'month': $('#list_months').val(),
+                                'day': day
+                            };
+                            break;
+                    }
+
 
                     $.ajax({
                         url: CONFIG.url_download + CONFIG.data_provider + '/',
@@ -522,7 +559,6 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 data: JSON.stringify(data),
                 contentType: 'application/json',
                 success: function (response) {
-                    console.log(response);
                     $('#' + tab_id + '_processing_result').html(response);
                 }
             });
