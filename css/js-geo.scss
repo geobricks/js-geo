@@ -43,6 +43,7 @@ $banner-color:  #379bce;
   float: right;
   height: 100%;
   padding: 15px 20px 0 0;
+  text-transform: uppercase;
 }
 
 .fs-languages span.fs-lan-selected {
@@ -103,4 +104,13 @@ $banner-color:  #379bce;
 
 .search-choice-close {
   top: 12px;
+}
+
+.nav.navbar-nav {
+  li.selected {
+    background-color: #777777;
+    a {
+      color: #F8F8F8;
+    }
+  }
 }

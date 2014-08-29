@@ -24,6 +24,7 @@ define(['jquery',
                     company: translate.company,
                     browse: translate.browse,
                     download: translate.download,
+                    scheduler: translate.scheduler,
                     configuration: translate.configuration,
                     login: translate.login
                 };

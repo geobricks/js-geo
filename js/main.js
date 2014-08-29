@@ -13,6 +13,7 @@ require.config({
         navbar          :   '../navbar/geobricks_navbar',
         browse          :   '../browse/geobricks_browse',
         download        :   '../download/geobricks_download',
+        scheduler        :   '../scheduler/geobricks_scheduler',
         underscore      :   '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min',
 
         // fenix-map-js
@@ -75,8 +76,8 @@ require(['jquery',
             '(/)home(/)': 'home',
             '(/)browse(/):lang': 'browse',
             '(/)browse(/)': 'browse',
-            '(/)download(/):lang': 'download',
-            '(/)download(/)': 'download',
+            '(/)scheduler(/):lang': 'scheduler',
+            '(/)scheduler(/)': 'scheduler',
             '(/)configuration(/):lang': 'configuration',
             '(/)configuration(/)': 'configuration',
             '': 'home'
@@ -98,6 +99,13 @@ require(['jquery',
             this._init(lang);
             require(['download'], function() {
                 DWLD().init({lang: lang});
+            });
+        },
+
+        scheduler: function(lang) {
+            this._init(lang);
+            require(['scheduler'], function() {
+                SCHEDULER().init({lang: lang});
             });
         },
 

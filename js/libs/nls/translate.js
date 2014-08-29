@@ -2,7 +2,8 @@ define({
     'root' : {
         'company' : 'Home',
         'browse': 'Browse',
-        'download': 'Scheduler',
+        'download': 'Download',
+        'scheduler': 'Scheduler',
         'configuration': 'Configuration',
         'login': 'Login',
         'data_providers': 'Data Providers',

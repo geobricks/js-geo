@@ -1,7 +1,8 @@
 define({
     'company' : 'Casa',
     'browse': 'Explorar',
-    'download': 'Organizador',
+    'download': 'Baixar',
+    'scheduler': 'Organizador',
     'configuration': 'Configuração',
     'login': 'Autenticar',
     'data_providers': 'Provedores de Dados',

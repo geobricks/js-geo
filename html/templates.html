@@ -133,6 +133,11 @@
                                     <i class='fa fa-home'></i> {{company}}
                                 </a>
                             </li>
+                            <li class='selected'>
+                                <a onclick="Backbone.history.navigate('scheduler/en', true);">
+                                    <i class='fa fa-clock-o'></i> {{scheduler}}
+                                </a>
+                            </li>
                             <li>
                                 <a onclick="Backbone.history.navigate('browse/en', true);">
                                     <i class='fa fa-search'></i> {{browse}}
@@ -140,7 +145,7 @@
                             </li>
                             <li>
                                 <a onclick="Backbone.history.navigate('download/en', true);">
-                                    <i class='fa fa-clock-o'></i> {{download}}
+                                    <i class='fa fa-download'></i> {{download}}
                                 </a>
                             </li>
                             <li>
