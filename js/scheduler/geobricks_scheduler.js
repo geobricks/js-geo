@@ -404,7 +404,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     case 'modis':
                         var s = '';
                         var day = from_day + i * 16;
-                        var d = new Date(parseInt($('#list_years_from').val()), 0, day);
+//                        var d = new Date(parseInt($('#list_years_from').val()), 0, day);
+                        var d = new Date(parseInt($('#list_years_from').val()), 0, 1+day);
                         s += d.getDate() + ' ' + CONFIG.months[d.getMonth()] + ' ' + $('#list_years_from').val();
                         $('#download_tab').append('<li id="' + i + '_li"><a role="tab" data-toggle="tab" href="#tab_' + i + '">' + s + '</a></li>');
                         $('#tab_contents').append('<div class="tab-pane" id="tab_' + i + '"><br></div>');
@@ -463,22 +464,50 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                                 'month': $('#list_months').val(),
                                 'day': day
                             };
+                            data.bulk_download_objects = [];
+                            data.bulk_download_objects.push({
+                                'ftp_base_url': 'trmmopen.gsfc.nasa.gov',
+                                'ftp_data_dir': '/trmmdata/GIS/1998/01/01',
+                                'file_list': ['3B42.19980101.00.7.tfw',
+                                              '3B42.19980101.00.7.tif',
+                                              '3B42.19980101.03.7.tfw',
+                                              '3B42.19980101.03.7.tif',
+                                              '3B42.19980101.06.7.tfw',
+                                              '3B42.19980101.06.7.tif']
+                            });
                             break;
                     }
 
-
-                    $.ajax({
-                        url: CONFIG.url_download + CONFIG.data_provider + '/',
-                        type: 'POST',
-                        dataType: 'json',
-                        data: JSON.stringify(data),
-                        contentType: 'application/json',
-                        success: function (response) {
-                            $('#download_tab a[href="#tab_0"]').tab('show');
-                            CONFIG.source_paths['tab_' + tab_index] = response.source_path;
-                            progress(json, 'tab_' + tab_index);
-                        }
-                    });
+                    switch (CONFIG.data_provider) {
+                        case 'modis':
+                            $.ajax({
+                                url: CONFIG.url_download + CONFIG.data_provider + '/',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: JSON.stringify(data),
+                                contentType: 'application/json',
+                                success: function (response) {
+                                    $('#download_tab a[href="#tab_0"]').tab('show');
+                                    CONFIG.source_paths['tab_' + tab_index] = response.source_path;
+                                    progress(json, 'tab_' + tab_index);
+                                }
+                            });
+                            break;
+                        case 'trmm2':
+                            $.ajax({
+                                url: 'http://127.0.0.1:5005/download/bulk/trmm2/',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: JSON.stringify(data),
+                                contentType: 'application/json',
+                                success: function (response) {
+                                    $('#download_tab a[href="#tab_0"]').tab('show');
+                                    CONFIG.source_paths['tab_' + tab_index] = response.source_path;
+                                    progress(json, 'tab_' + tab_index);
+                                }
+                            });
+                            break;
+                    }
 
                 }
 
@@ -497,48 +526,96 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
         };
 
         var progress = function(json, tab_id) {
-            clean_progress_tab(tab_id);
-            for (var i = 0 ; i < json.length ; i++) {
-                var view = {
-                    label: (1 + i) + ') ' + json[i]['label'],
-                    id: json[i]['file_name'],
-                    id_percentage: json[i]['file_name'] + '_percentage'
-                };
-                var template = $(templates).filter('#loading_bar_template').html();
-                var render = Mustache.render(template, view);
-                $('#' + tab_id).append(render);
-                setTimeout(init_progress(json[i]['file_name'], tab_id), 5000);
+            switch (CONFIG.data_provider) {
+                case 'modis':
+                    clean_progress_tab(tab_id);
+                    for (var i = 0; i < json.length; i++) {
+                        var view = {
+                            label: (1 + i) + ') ' + json[i]['label'],
+                            id: json[i]['file_name'],
+                            id_percentage: json[i]['file_name'] + '_percentage'
+                        };
+                        var template = $(templates).filter('#loading_bar_template').html();
+                        var render = Mustache.render(template, view);
+                        $('#' + tab_id).append(render);
+                        setTimeout(init_progress(json[i]['file_name'], tab_id), 5000);
+                    }
+                    $('#' + tab_id).append('<div id="' + tab_id + '_processing_result">Processing Result</div>');
+                    break;
+                case 'trmm2':
+                    clean_progress_tab(tab_id);
+                    var view = {
+                        label: 'Label',
+                        id: tab_id + '_progress',
+                        id_percentage: tab_id + '_progress_percentage'
+                    };
+                    var template = $(templates).filter('#loading_bar_template').html();
+                    var render = Mustache.render(template, view);
+                    $('#' + tab_id).append(render);
+                    init_progress(null, tab_id);
+                    break;
             }
-            $('#' + tab_id).append('<div id="' + tab_id + '_processing_result">Processing Result</div>');
         };
 
         var init_progress = function(filename, tab_id) {
-            if (CONFIG.timers_map[tab_id] == null)
-                CONFIG.timers_map[tab_id] = {};
-            CONFIG.timers_map[tab_id][filename] = setInterval(function (id) {
-                $.ajax({
-                    url: CONFIG.url_progress + tab_id + '/' + id + '/',
-                    type: 'GET',
-                    success: function (progress) {
-                        $(document.getElementById(id)).attr('aria-valuenow', progress.progress);
-                        $(document.getElementById(id)).css('width', progress.progress + '%');
-                        if (!isNaN(parseFloat(progress.progress))) {
-                            var msg = '';
-                            msg += '[' + (parseFloat(progress.download_size) / 1000000).toFixed(2) + ' / ' + (parseFloat(progress.total_size) / 1000000).toFixed(2) + '] ';
-                            msg += '<b>' + progress.progress + '%</b>';
-                            $(document.getElementById(id + '_percentage')).html(msg);
-                        }
-                        if (parseFloat(progress.progress) >= 100) {
-                            clearInterval(CONFIG.timers_map[tab_id][id]);
-                            delete CONFIG.timers_map[tab_id][id];
-                            $(document.getElementById(id)).removeClass('progress-bar-warning');
-                            $(document.getElementById(id)).addClass('progress-bar-success');
-                            if (Object.keys(CONFIG.timers_map[tab_id]).length == 0)
-                                processing(tab_id);
-                        }
-                    }
-                });
-            }, 1000, filename);
+            switch (CONFIG.data_provider) {
+                case 'modis':
+                    if (CONFIG.timers_map[tab_id] == null)
+                        CONFIG.timers_map[tab_id] = {};
+                    CONFIG.timers_map[tab_id][filename] = setInterval(function (id) {
+                        $.ajax({
+                            url: CONFIG.url_progress + tab_id + '/' + id + '/',
+                            type: 'GET',
+                            success: function (progress) {
+                                $(document.getElementById(id)).attr('aria-valuenow', progress.progress);
+                                $(document.getElementById(id)).css('width', progress.progress + '%');
+                                if (!isNaN(parseFloat(progress.progress))) {
+                                    var msg = '';
+                                    msg += '[' + (parseFloat(progress.download_size) / 1000000).toFixed(2) + ' / ' + (parseFloat(progress.total_size) / 1000000).toFixed(2) + '] ';
+                                    msg += '<b>' + progress.progress + '%</b>';
+                                    $(document.getElementById(id + '_percentage')).html(msg);
+                                }
+                                if (parseFloat(progress.progress) >= 100) {
+                                    clearInterval(CONFIG.timers_map[tab_id][id]);
+                                    delete CONFIG.timers_map[tab_id][id];
+                                    $(document.getElementById(id)).removeClass('progress-bar-warning');
+                                    $(document.getElementById(id)).addClass('progress-bar-success');
+                                    if (Object.keys(CONFIG.timers_map[tab_id]).length == 0)
+                                        processing(tab_id);
+                                }
+                            }
+                        });
+                    }, 1000, filename);
+                    break;
+                case 'trmm2':
+                    CONFIG.timers_map[tab_id] = setInterval(function (id) {
+                        console.log(id);
+                        $.ajax({
+                            url: 'http://127.0.0.1:5005/download/bulk/progress/' + tab_id + '/',
+                            type: 'GET',
+                            success: function (progress) {
+                                console.log(progress);
+                                $(document.getElementById(id)).attr('aria-valuenow', progress.progress);
+                                $(document.getElementById(id)).css('width', progress.progress + '%');
+                                if (!isNaN(parseFloat(progress.progress))) {
+                                    var msg = '';
+                                    msg += '[' + progress.downloaded_files + '/' + progress.total_files + '] ';
+                                    msg += '<b>' + progress.progress + '%</b>';
+                                    $(document.getElementById(id + '_percentage')).html(msg);
+                                }
+                                if (parseFloat(progress.progress) >= 100) {
+                                    clearInterval(CONFIG.timers_map[tab_id]);
+                                    delete CONFIG.timers_map[tab_id];
+                                    $(document.getElementById(id)).removeClass('progress-bar-warning');
+                                    $(document.getElementById(id)).addClass('progress-bar-success');
+                                    if (Object.keys(CONFIG.timers_map).length == 0)
+                                        processing(tab_id);
+                                }
+                            }
+                        });
+                    }, 1000, tab_id + '_progress');
+                    break;
+            }
         };
 
         var clean_progress_tab = function(tab_id) {
@@ -551,7 +628,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
         var processing = function (tab_id) {
             var data = {};
             data.source_path = CONFIG.source_paths[tab_id];
-            data.pixel_size = 0.004166665;
+//            data.pixel_size = 0.004166665;
+            data.pixel_size = 0.002083332;
             $.ajax({
                 url: CONFIG.url_processing + CONFIG.data_provider + '/',
                 type: 'POST',
