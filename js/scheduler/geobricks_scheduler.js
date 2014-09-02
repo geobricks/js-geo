@@ -588,7 +588,6 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                                 }
                             },
                             error: function(a, b, c) {
-                                console.log('Timer deleted: ' + tab_id + ', ' + id);
                                 clearInterval(CONFIG.timers_map[tab_id][id]);
                                 delete CONFIG.timers_map[tab_id][id];
                             }
@@ -603,7 +602,6 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             success: function (progress) {
                                 $(document.getElementById(id)).attr('aria-valuenow', progress.progress);
                                 $(document.getElementById(id)).css('width', progress.progress + '%');
-                                console.log('Progress ' + progress.progress + ' for ' + id);
                                 if (!isNaN(parseFloat(progress.progress))) {
                                     var msg = '';
                                     msg += '[' + progress.downloaded_files + '/' + progress.total_files + '] ';
