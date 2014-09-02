@@ -8,6 +8,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             lang:                                   'en',
             url_data_providers:                     'http://127.0.0.1:5005/schema/sources/',
             url_download:                           'http://127.0.0.1:5005/download/',
+            url_bulk_progress:                      'http://127.0.0.1:5005/download/bulk/progress/',
+            url_bulk_download:                      'http://127.0.0.1:5005/download/bulk/trmm2/',
             url_processing:                         'http://127.0.0.1:5005/download/process/',
             url_gaul_2_modis:                       'http://127.0.0.1:5005/browse/modis/countries/',
             url_progress:                           'http://127.0.0.1:5005/download/progress/',
@@ -404,7 +406,6 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     case 'modis':
                         var s = '';
                         var day = from_day + i * 16;
-//                        var d = new Date(parseInt($('#list_years_from').val()), 0, day);
                         var d = new Date(parseInt($('#list_years_from').val()), 0, 1+day);
                         s += d.getDate() + ' ' + CONFIG.months[d.getMonth()] + ' ' + $('#list_years_from').val();
                         $('#download_tab').append('<li id="' + i + '_li"><a role="tab" data-toggle="tab" href="#tab_' + i + '">' + s + '</a></li>');
@@ -458,22 +459,24 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             };
                             break;
                         case 'trmm2':
-                            var day = date.getDay() < 10 ? ('0' + date.getDay()) : date.getDay();
+                            var day = date.getDate() < 10 ? ('0' + date.getDate()) : date.getDate();
                             data.filesystem_structure = {
                                 'year': $('#list_years').val(),
                                 'month': $('#list_months').val(),
                                 'day': day
                             };
                             data.bulk_download_objects = [];
+                            var file_list = [];
+                            for (var z = 0 ; z < response.length ; z++)
+                                file_list.push(response[z].file_name)
+                            var ftp_data_dir = CONFIG.data_provider_config.ftp.data_dir;
+                            ftp_data_dir += $('#list_years').val() + '/';
+                            ftp_data_dir += $('#list_months').val() + '/';
+                            ftp_data_dir += day + '/';
                             data.bulk_download_objects.push({
-                                'ftp_base_url': 'trmmopen.gsfc.nasa.gov',
-                                'ftp_data_dir': '/trmmdata/GIS/1998/01/01',
-                                'file_list': ['3B42.19980101.00.7.tfw',
-                                              '3B42.19980101.00.7.tif',
-                                              '3B42.19980101.03.7.tfw',
-                                              '3B42.19980101.03.7.tif',
-                                              '3B42.19980101.06.7.tfw',
-                                              '3B42.19980101.06.7.tif']
+                                'ftp_base_url': CONFIG.data_provider_config.ftp.base_url,
+                                'ftp_data_dir': ftp_data_dir,
+                                'file_list': file_list
                             });
                             break;
                     }
@@ -495,7 +498,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             break;
                         case 'trmm2':
                             $.ajax({
-                                url: 'http://127.0.0.1:5005/download/bulk/trmm2/',
+                                url: CONFIG.url_bulk_download,
                                 type: 'POST',
                                 dataType: 'json',
                                 data: JSON.stringify(data),
@@ -583,20 +586,24 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                                     if (Object.keys(CONFIG.timers_map[tab_id]).length == 0)
                                         processing(tab_id);
                                 }
+                            },
+                            error: function(a, b, c) {
+                                console.log('Timer deleted: ' + tab_id + ', ' + id);
+                                clearInterval(CONFIG.timers_map[tab_id][id]);
+                                delete CONFIG.timers_map[tab_id][id];
                             }
                         });
                     }, 1000, filename);
                     break;
                 case 'trmm2':
                     CONFIG.timers_map[tab_id] = setInterval(function (id) {
-                        console.log(id);
                         $.ajax({
-                            url: 'http://127.0.0.1:5005/download/bulk/progress/' + tab_id + '/',
+                            url: CONFIG.url_bulk_progress + tab_id + '/',
                             type: 'GET',
                             success: function (progress) {
-                                console.log(progress);
                                 $(document.getElementById(id)).attr('aria-valuenow', progress.progress);
                                 $(document.getElementById(id)).css('width', progress.progress + '%');
+                                console.log('Progress ' + progress.progress + ' for ' + id);
                                 if (!isNaN(parseFloat(progress.progress))) {
                                     var msg = '';
                                     msg += '[' + progress.downloaded_files + '/' + progress.total_files + '] ';
@@ -611,9 +618,24 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                                     if (Object.keys(CONFIG.timers_map).length == 0)
                                         processing(tab_id);
                                 }
+                            },
+                            error: function(a, b, c) {
+                                $(document.getElementById(id)).attr('aria-valuenow', 100);
+                                $(document.getElementById(id)).css('width', '100%');
+                                $(document.getElementById(id)).removeClass('progress-bar-warning');
+                                switch (a.responseJSON.message) {
+                                    case 'COMPLETE':
+                                        $(document.getElementById(id)).addClass('progress-bar-success');
+                                        break;
+                                    case 'ERROR':
+                                        $(document.getElementById(id)).addClass('progress-bar-danger');
+                                        break;
+                                }
+                                clearInterval(CONFIG.timers_map[tab_id]);
+                                delete CONFIG.timers_map[tab_id];
                             }
                         });
-                    }, 1000, tab_id + '_progress');
+                    }, 250, tab_id + '_progress');
                     break;
             }
         };
