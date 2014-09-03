@@ -380,22 +380,30 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     data.file_paths_and_sizes = json;
                     data.tab_id = 'tab_' + tab_index;
 
-                    data.filesystem_structure = {};
-                    var fs = CONFIG.data_provider_config.services.download.filesystem_structure;
-                    for (var i = 0 ; i < fs.length ; i++) {
-                        var n = fs[i].parameter_name;
-                        var v = fs[i].parameter_value;
-                        if (v.indexOf('$') > -1) {
-                            switch (v) {
-                                case '$create_day_of_the_year':
-                                    data.filesystem_structure[n] = create_day_of_the_year(date);
-                                    break;
-                                case '$create_day':
-                                    data.filesystem_structure[n] = $create_day(date);
+                    for (var key in CONFIG.data_provider_config.services.download.payload) {
+                        if (key.indexOf('__') < 0) {
+                            var obj = CONFIG.data_provider_config.services.download.payload[key];
+                            switch (obj.type) {
+                                case 'object':
+                                    data[key] = {};
+                                    for (var i = 0; i < obj.parameters.length; i++) {
+                                        var n = obj.parameters[i].parameter_name;
+                                        var v = obj.parameters[i].parameter_value;
+                                        if (v.indexOf('$') > -1) {
+                                            switch (v) {
+                                                case '$create_day_of_the_year':
+                                                    data[key][n] = create_day_of_the_year(date);
+                                                    break;
+                                                case '$create_day':
+                                                    data[key][n] = $create_day(date);
+                                                    break;
+                                            }
+                                        } else {
+                                            data[key][n] = $('#' + v).val()
+                                        }
+                                    }
                                     break;
                             }
-                        } else {
-                            data.filesystem_structure[n] = $('#' + v).val()
                         }
                     }
 
@@ -421,7 +429,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
                     /* Create the download URL. */
                     var url = null;
-                    switch (CONFIG.data_provider_config.services.download.type) {
+                    switch (CONFIG.data_provider_config.services.download.__type) {
                         case 'standard':
                             url = CONFIG.url_download + CONFIG.data_provider + '/';
                             break;
