@@ -141,13 +141,6 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             CONFIG.data_provider_filename = $('#' + CONFIG.id_data_providers).val();
             CONFIG.data_provider = CONFIG.data_provider_filename.substring(0, CONFIG.data_provider_filename.indexOf('.json'));
 
-            /* Add countries for MODIS. */
-            switch (CONFIG.data_provider) {
-                case 'modis':
-                    create_modis2gaul_dropdown();
-                    break;
-            }
-
             $.ajax({
 
                 url: CONFIG.url_data_providers + CONFIG.data_provider_filename + '/',
@@ -162,64 +155,13 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         json = $.parseJSON(response);
                     CONFIG.data_provider_config = json;
 
+                    /* Create countries, if any.. */
+                    if (json.services.countries != null)
+                        create_dropdown(json.base_url, json.services.countries, null);
+
+                    /* Create filters. */
                     for (var i = 0 ; i < json.services.filters.length; i++)
                         create_dropdown(json.base_url, json.services.filters[i], i);
-
-                }
-
-            });
-
-        };
-
-        var create_modis2gaul_dropdown = function() {
-
-            $('#gaul2modis_placeholder').empty();
-
-            $.ajax({
-
-                url: CONFIG.url_gaul_2_modis,
-                type: 'GET',
-                dataType: 'json',
-
-                success: function(response) {
-
-                    /* Load multi-language plug-in. */
-                    require(['i18n!nls/translate'], function (translate) {
-
-                        var json = response;
-                        if (typeof json == 'string')
-                            json = $.parseJSON(response);
-
-                        /* Load template. */
-                        var template;
-                        var view;
-                        template = $(templates).filter('#' + CONFIG.id_multiple_generic_dropdown_template).html();
-                        view = {
-                            multiple_generic_dropdown_label: translate.countries,
-                            multiple_generic_dropdown_id: CONFIG.id_gaul_2_modis,
-                            multiple_generic_dropdown_container_id: CONFIG.id_gaul_2_modis + '_container'
-                        };
-                        var render = Mustache.render(template, view);
-                        $('#gaul2modis_placeholder').append(render);
-
-                        /* Create drop-down. */
-                        var s = '';
-                        s += '<option value="null">' + translate.please_select + '</option>';
-                        for (var i = 0; i < json.length; i++) {
-                            s += '<option value="' + json[i].gaul_code + '" ';
-                            s += 'data-from_h="' + json[i].from_h + '" ';
-                            s += 'data-to_h="' + json[i].to_h + '" ';
-                            s += 'data-from_v="' + json[i].from_v + '" ';
-                            s += 'data-to_v="' + json[i].to_v + '" ';
-                            s += 'data-gaul_code="' + json[i].gaul_code + '" ';
-                            s += '>';
-                            s += json[i].gaul_label;
-                            s += '</option>';
-                        }
-                        $('#' + CONFIG.id_gaul_2_modis).html(s);
-                        $('#' + CONFIG.id_gaul_2_modis).chosen({disable_search_threshold: 10});
-
-                    });
 
                 }
 
@@ -288,8 +230,14 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                                 s += '<option value="' + inner_json[i].code + '">' + lbl + '</option>';
                             }
                         } else {
-                            for (var i = 0; i < inner_json.length; i++)
-                                s += '<option value="' + inner_json[i][json.payload.id] + '">' + inner_json[i][json.payload.label] + '</option>';
+                            for (var i = 0; i < inner_json.length; i++) {
+                                s += '<option value="' + inner_json[i][json.payload.id] + '" ';
+                                for (var key in inner_json[i])
+                                    s += 'data-' + key + '=\"' + inner_json[i][key] + '\"';
+                                s += '>';
+                                s += inner_json[i][json.payload.label];
+                                s += '</option>';
+                            }
                         }
 
                         $('#' + json.id).html(s);
@@ -344,48 +292,41 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
         var download_layers = function() {
 
             /* Fill parameters with values from the drop-downs. */
-            if (CONFIG.data_provider_config.services.layers.parameters.length > 0) {
-                for (var i = 0 ; i < CONFIG.data_provider_config.services.layers.parameters.length ; i++) {
-                    var p = '{' + CONFIG.data_provider_config.services.layers.parameters[i].parameter_name + '}';
-                    var v = $('#' + CONFIG.data_provider_config.services.layers.parameters[i].parameter_value).val();
-                    CONFIG.data_provider_config.services.layers.path = CONFIG.data_provider_config.services.layers.path.replace(p, v);
-                }
-            }
+//            if (CONFIG.data_provider_config.services.layers.parameters.length > 0) {
+//                for (var i = 0 ; i < CONFIG.data_provider_config.services.layers.parameters.length ; i++) {
+//                    var p = '{' + CONFIG.data_provider_config.services.layers.parameters[i].parameter_name + '}';
+//                    try {
+//                        var v = $('#' + CONFIG.data_provider_config.services.layers.parameters[i].parameter_value).val();
+//                        CONFIG.data_provider_config.services.layers.path = CONFIG.data_provider_config.services.layers.path.replace(p, v);
+//                    } catch(e) {
+//
+//                    }
+//                }
+//            }
 
             /* Build URL. */
-            var url = CONFIG.data_provider_config.base_url + CONFIG.data_provider_config.services.layers.path + '/';
+//            var url = CONFIG.data_provider_config.base_url + CONFIG.data_provider_config.services.layers.path + '/';
 
             /* Build countries list, comma separated. */
-            switch (CONFIG.data_provider) {
-                case 'modis':
-                    var countries = $('#gaul_2_modis_list').find(':selected');
-                    var s = '';
-                    for (var i = 0 ; i < countries.length ; i++) {
-                        s += $(countries[i]).data('gaul_code');
-                        if (i < countries.length - 1)
-                            s += ',';
-                    }
-                    url += s + '/';
-            }
+//            if (CONFIG.data_provider_config.services.countries != null) {
+//                var countries = $('#' + CONFIG.data_provider_config.services.countries.id).find(':selected');
+//                var s = '';
+//                for (var i = 0 ; i < countries.length ; i++) {
+//                    s += $(countries[i]).data('gaul_code');
+//                    if (i < countries.length - 1)
+//                        s += ',';
+//                }
+//                url += s + '/';
+//            }
 
             /* Fetch time interval. */
             var total_tabs = null;
             var from_day = null;
             var to_day = null;
-            switch (CONFIG.data_provider) {
-                case 'modis':
-                    try {
-                        to_day = parseInt($('#list_days_to').val());
-                    } catch (e) {
-                        to_day = from_day;
-                    }
-                    total_tabs = 1 + (to_day - from_day) / 16;
-                    break;
-                case 'trmm2':
-                    from_day = parseInt($('#list_days_from').val());
-                    to_day = parseInt($('#list_days_to').val());
-                    total_tabs = 1 + (to_day - from_day);
-                    break;
+            if (CONFIG.data_provider_config.services.time_range != null) {
+                from_day = parseInt($('#' + CONFIG.data_provider_config.services.time_range.from).val());
+                to_day = parseInt($('#' + CONFIG.data_provider_config.services.time_range.to).val());
+                total_tabs = parseInt(1 + (to_day - from_day) / CONFIG.data_provider_config.services.time_range.step);
             }
 
             /* Clear existing tabs and timers. */
@@ -402,39 +343,75 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
             /* Create a tab for each date. */
             for (var i = 0 ; i < total_tabs ; i++) {
-                switch (CONFIG.data_provider) {
-                    case 'modis':
-                        var s = '';
-                        var day = from_day + i * 16;
-                        var d = new Date(parseInt($('#list_years_from').val()), 0, 1+day);
-                        s += d.getDate() + ' ' + CONFIG.months[d.getMonth()] + ' ' + $('#list_years_from').val();
-                        $('#download_tab').append('<li id="' + i + '_li"><a role="tab" data-toggle="tab" href="#tab_' + i + '">' + s + '</a></li>');
-                        $('#tab_contents').append('<div class="tab-pane" id="tab_' + i + '"><br></div>');
-                        init_tab(url, i, d);
-                        break;
-                    case 'trmm2':
-                        var year = parseInt($('#list_years').val());
-                        var month = parseInt($('#list_months').val()) - 1;
-                        var day = from_day + i;
-                        var d = new Date(year, month, day);
-                        s = day + ' ' + CONFIG.months[d.getMonth()] + ' ' + year;
-                        $('#download_tab').append('<li id="' + i + '_li"><a role="tab" data-toggle="tab" href="#tab_' + i + '">' + s + '</a></li>');
-                        $('#tab_contents').append('<div class="tab-pane" id="tab_' + i + '"><br></div>');
-                        init_tab(url, i, d);
-                        break;
-                }
+                var s = '';
+                var day = from_day + i * CONFIG.data_provider_config.services.time_range.step;
+                var d = new Date(parseInt($('#' + CONFIG.data_provider_config.services.time_range.from).val()), 0, day);
+                s += d.getDate() + ' ' + CONFIG.months[d.getMonth()] + ' ' + $('#' + CONFIG.data_provider_config.services.time_range.from).val();
+                $('#download_tab').append('<li id="' + i + '_li"><a role="tab" data-toggle="tab" href="#tab_' + i + '">' + s + '</a></li>');
+                $('#tab_contents').append('<div class="tab-pane" id="tab_' + i + '"><br></div>');
+//                init_tab(url, i, d);
+                init_tab(null, i, d);
             }
 
         };
 
         var init_tab = function(url, tab_index, date) {
 
+            /* Fill parameters with values from the drop-downs. */
+//            if (CONFIG.data_provider_config.services.layers.parameters.length > 0) {
+//                for (var i = 0 ; i < CONFIG.data_provider_config.services.layers.parameters.length ; i++) {
+//                    var p = '{' + CONFIG.data_provider_config.services.layers.parameters[i].parameter_name + '}';
+//                    var v = CONFIG.data_provider_config.services.layers.parameters[i].parameter_value;
+//                    console.log(v);
+//                    if (v.indexOf('$') > -1) {
+//                        v = create_day_of_the_year(date)
+//                    }
+//                    console.log(v);
+//                    CONFIG.data_provider_config.services.layers.path = CONFIG.data_provider_config.services.layers.path.replace(p, v);
+//                    console.log(CONFIG.data_provider_config.services.layers.path);
+//                    console.log();
+//                }
+//            }
+
             /* Replace the correct day in the URL. */
-            switch (CONFIG.data_provider) {
-                case 'modis':
-                    url = url.replace($('#list_days_from').val(), create_day_of_the_year(date));
-                    break;
+//            switch (CONFIG.data_provider) {
+//                case 'modis':
+//                    url = url.replace($('#' + CONFIG.data_provider_config.services.time_range.from).val(), create_day_of_the_year(date));
+//                    console.log(url);
+//                    break;
+//            }
+
+            /* Fill parameters with values from the drop-downs. */
+            if (CONFIG.data_provider_config.services.layers.parameters.length > 0) {
+                for (var i = 0 ; i < CONFIG.data_provider_config.services.layers.parameters.length ; i++) {
+                    var p = '{' + CONFIG.data_provider_config.services.layers.parameters[i].parameter_name + '}';
+                    var v = null;
+                    try {
+                        v = $('#' + CONFIG.data_provider_config.services.layers.parameters[i].parameter_value).val();
+                    } catch(e) {
+                        v = CONFIG.data_provider_config.services.layers.parameters[i].parameter_value;
+                        if (v.indexOf('$') > -1)
+                            v = create_day_of_the_year(date)
+                    }
+                    CONFIG.data_provider_config.services.layers.path = CONFIG.data_provider_config.services.layers.path.replace(p, v);
+                }
             }
+
+            /* Build URL. */
+            var url = CONFIG.data_provider_config.base_url + CONFIG.data_provider_config.services.layers.path + '/';
+
+            /* Build countries list, comma separated. */
+            if (CONFIG.data_provider_config.services.countries != null) {
+                var countries = $('#' + CONFIG.data_provider_config.services.countries.id).find(':selected');
+                var s = '';
+                for (var i = 0 ; i < countries.length ; i++) {
+                    s += $(countries[i]).data('gaul_code');
+                    if (i < countries.length - 1)
+                        s += ',';
+                }
+                url += s + '/';
+            }
+            console.log(url);
 
             $.ajax({
 
