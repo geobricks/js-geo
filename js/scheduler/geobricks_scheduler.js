@@ -439,18 +439,18 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     }
 
                     /* Start the download. */
-//                    $.ajax({
-//                        url: url,
-//                        type: 'POST',
-//                        dataType: 'json',
-//                        data: JSON.stringify(data),
-//                        contentType: 'application/json',
-//                        success: function (response) {
-//                            $('#download_tab a[href="#tab_0"]').tab('show');
-//                            CONFIG.source_paths['tab_' + tab_index] = response.source_path;
-//                            progress(json, 'tab_' + tab_index);
-//                        }
-//                    });
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        dataType: 'json',
+                        data: JSON.stringify(data),
+                        contentType: 'application/json',
+                        success: function (response) {
+                            $('#download_tab a[href="#tab_0"]').tab('show');
+                            CONFIG.source_paths['tab_' + tab_index] = response.source_path;
+                            progress(json, 'tab_' + tab_index, response);
+                        }
+                    });
 
                 }
 
@@ -472,7 +472,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             return date.getDate() < 10 ? ('0' + date.getDate()) : date.getDate()
         };
 
-        var progress = function(json, tab_id) {
+        var progress = function(json, tab_id, target_folder) {
             clean_progress_tab(tab_id);
             switch (CONFIG.data_provider) {
                 case 'modis':
@@ -485,9 +485,9 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         var template = $(templates).filter('#loading_bar_template').html();
                         var render = Mustache.render(template, view);
                         $('#' + tab_id).append(render);
-                        setTimeout(init_progress(json[i]['file_name'], tab_id), 5000);
+                        setTimeout(init_progress(json[i]['file_name'], tab_id, target_folder), 5000);
                     }
-                    $('#' + tab_id).append('<div id="' + tab_id + '_processing_result">Processing Result</div>');
+                    $('#' + tab_id).append('<div id="' + tab_id + '_processing_result"><b>Processing Result</b><br><ul id="result_list_' + tab_id + '"></ul></div>');
                     break;
                 case 'trmm2':
                     var view = {
@@ -498,12 +498,12 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     var template = $(templates).filter('#loading_bar_template').html();
                     var render = Mustache.render(template, view);
                     $('#' + tab_id).append(render);
-                    init_progress(null, tab_id);
+                    init_progress(null, tab_id, target_folder);
                     break;
             }
         };
 
-        var init_progress = function(filename, tab_id) {
+        var init_progress = function(filename, tab_id, target_folder) {
             switch (CONFIG.data_provider) {
                 case 'modis':
                     if (CONFIG.timers_map[tab_id] == null)
@@ -527,7 +527,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                                     $(document.getElementById(id)).removeClass('progress-bar-warning');
                                     $(document.getElementById(id)).addClass('progress-bar-success');
                                     if (Object.keys(CONFIG.timers_map[tab_id]).length == 0)
-                                        processing(tab_id);
+                                        processing(tab_id, target_folder);
                                 }
                             },
                             error: function(a, b, c) {
@@ -588,19 +588,40 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 delete CONFIG.timers_map[tab_id][key]
         };
 
-        var processing = function (tab_id) {
-            var data = {};
-            data.source_path = CONFIG.source_paths[tab_id];
-//            data.pixel_size = 0.004166665;
-            data.pixel_size = 0.002083332;
+        var processing = function (tab_id, target_folder) {
             $.ajax({
-                url: CONFIG.url_processing + CONFIG.data_provider + '/',
-                type: 'POST',
+                url: 'http://127.0.0.1:5005/process/list/' + CONFIG.data_provider + '/',
+                type: 'GET',
                 dataType: 'json',
-                data: JSON.stringify(data),
                 contentType: 'application/json',
                 success: function (response) {
-                    $('#' + tab_id + '_processing_result').html(response);
+                    var json = response;
+                    if (typeof json == 'string')
+                        json = $.parseJSON(response);
+                    var source_folder = [target_folder.source_path + '/*.hdf'];
+                    var target = target_folder.source_path + '/OUTPUT';
+                    process_step(tab_id, json, 0, source_folder, target, process_step);
+                }
+            });
+        };
+
+        var process_step = function(tab_id, steps, current_step, source_folder, target_folder, callback) {
+            steps[current_step].source_path = source_folder;
+            steps[current_step].output_path = target_folder;
+            $.ajax({
+                url: 'http://127.0.0.1:5005/process/' + CONFIG.data_provider + '/',
+                type: 'POST',
+                dataType: 'json',
+                data: JSON.stringify(steps[current_step]),
+                contentType: 'application/json',
+                success: function (response) {
+                    var json = response;
+                    if (typeof json == 'string')
+                        json = $.parseJSON(response);
+                    for (var i = 0 ; i < json.length ; i++)
+                        $('#result_list_' + tab_id).append('<li>' + json[i] + '</li>');
+                    if (parseInt(1 + current_step) < steps.length)
+                        callback(tab_id, steps, parseInt(1+current_step), json, target_folder, callback);
                 }
             });
         };
