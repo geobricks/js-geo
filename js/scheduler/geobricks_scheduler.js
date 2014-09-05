@@ -320,7 +320,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                 var s = '';
                 var day = from_day + i * CONFIG.data_provider_config.services.time_range.step;
                 var d = new Date(parseInt($('#' + CONFIG.data_provider_config.services.time_range.from).val()), 0, day);
-                s += d.getDate() + ' ' + CONFIG.months[d.getMonth()] + ' ' + $('#' + CONFIG.data_provider_config.services.time_range.from).val();
+                s += d.getDate() + ' ' + CONFIG.months[d.getMonth()] + ' ' + $('#' + CONFIG.data_provider_config.services.time_range.year).val();
                 $('#download_tab').append('<li id="' + i + '_li"><a role="tab" data-toggle="tab" href="#tab_' + i + '">' + s + '</a></li>');
                 $('#tab_contents').append('<div class="tab-pane" id="tab_' + i + '"><br></div>');
                 init_tab(i, d);
@@ -607,13 +607,14 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         json = $.parseJSON(response);
                     var source_folder = [target_folder.source_path + '/*.hdf'];
                     var band_index = CONFIG.data_provider_config.bands[i].index;
-                    var target = target_folder.source_path + '/' + CONFIG.data_provider_config.subfolders.output + '_' + band_index;
-                    process_step(tab_id, json, 0, band_index, source_folder, target, process_step);
+                    var band_label = CONFIG.data_provider_config.bands[i].label;
+                    var target = target_folder.source_path + '/' + CONFIG.data_provider_config.subfolders.output + '_' + band_label;
+                    process_step(tab_id, json, 0, band_index, band_label, source_folder, target, process_step);
                 }
             });
         };
 
-        var process_step = function(tab_id, steps, current_step, band_index, source_folder, target_folder, callback) {
+        var process_step = function(tab_id, steps, current_step, band_index, band_label, source_folder, target_folder, callback) {
             steps[current_step].source_path = source_folder;
             steps[current_step].output_path = target_folder;
             steps[current_step].band = band_index;
@@ -628,13 +629,17 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     if (typeof json == 'string')
                         json = $.parseJSON(response);
                     for (var i = 0 ; i < json.length ; i++)
-                        $('#result_list_' + tab_id).append('<li>' + json[i] + '</li>');
+                        $('#result_list_' + tab_id).append('<li>Step result: ' + json[i] + '</li>');
                     if (parseInt(1 + current_step) < steps.length) {
-                        callback(tab_id, steps, parseInt(1 + current_step), band_index, json, target_folder, callback);
+                        callback(tab_id, steps, parseInt(1 + current_step), band_index, band_label, json, target_folder, callback);
                     } else {
-                        var s = '<li><a target="_blank" href="http://127.0.0.1:5005/distribution/downloadraster/' + json[json.length - 1].split('/').join(':') + '">';
-                        s += 'Click to open: ' + json[json.length - 1];
-                        s += '</a></li>';
+                        var s = '<li>';
+                        s += '<b>Layer band "' + band_label + '" successfully downloaded an processed. (';
+                        s += '<a target="_blank" href="http://127.0.0.1:5005/distribution/downloadraster/';
+                        s += json[json.length - 1].split('/').join(':');
+                        s += '">';
+                        s += 'open';
+                        s += ')</b></a></li>';
                         $('#result_list_' + tab_id).append(s);
                     }
                 }
