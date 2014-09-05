@@ -14,6 +14,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             url_gaul_2_modis:                       'http://127.0.0.1:5005/browse/modis/countries/',
             url_progress:                           'http://127.0.0.1:5005/download/progress/',
             url_process:                            'http://127.0.0.1:5005/process/',
+            url_publish:                            'http://127.0.0.1:5005/process/publish/',
             url_process_list:                       'http://127.0.0.1:5005/process/list/',
             id_placeholder:                         'main_content_placeholder',
             id_data_providers_placeholder:          'data_providers_placeholder',
@@ -641,6 +642,17 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         s += 'open';
                         s += ')</b></a></li>';
                         $('#result_list_' + tab_id).append(s);
+                        console.log(json);
+                        console.log('start publishing');
+                        $.ajax({
+                            url: CONFIG.url_publish + 'fnx_' + parseInt(1000000 * Math.random()).toString() + '/' + json[json.length - 1].split('/').join(':') + '/',
+                            type: 'POST',
+                            dataType: 'json',
+                            contentType: 'application/json',
+                            success: function (response) {
+                                console.log(response);
+                            }
+                        });
                     }
                 }
             });
