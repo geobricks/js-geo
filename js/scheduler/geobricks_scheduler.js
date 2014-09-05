@@ -13,6 +13,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             url_processing:                         'http://127.0.0.1:5005/download/process/',
             url_gaul_2_modis:                       'http://127.0.0.1:5005/browse/modis/countries/',
             url_progress:                           'http://127.0.0.1:5005/download/progress/',
+            url_process:                            'http://127.0.0.1:5005/process/',
+            url_process_list:                       'http://127.0.0.1:5005/process/list/',
             id_placeholder:                         'main_content_placeholder',
             id_data_providers_placeholder:          'data_providers_placeholder',
             id_data_providers_template:             'data_providers_template',
@@ -589,8 +591,13 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
         };
 
         var processing = function (tab_id, target_folder) {
+            for (var i = 0 ; i < CONFIG.data_provider_config.bands.length ; i++)
+                processing_function(tab_id, target_folder, i);
+        };
+
+        var processing_function = function (tab_id, target_folder, i) {
             $.ajax({
-                url: 'http://127.0.0.1:5005/process/list/' + CONFIG.data_provider + '/',
+                url: CONFIG.url_process_list + CONFIG.data_provider + '/',
                 type: 'GET',
                 dataType: 'json',
                 contentType: 'application/json',
@@ -599,17 +606,19 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     if (typeof json == 'string')
                         json = $.parseJSON(response);
                     var source_folder = [target_folder.source_path + '/*.hdf'];
-                    var target = target_folder.source_path + '/OUTPUT';
-                    process_step(tab_id, json, 0, source_folder, target, process_step);
+                    var band_index = CONFIG.data_provider_config.bands[i].index;
+                    var target = target_folder.source_path + '/' + CONFIG.data_provider_config.subfolders.output + '_' + band_index;
+                    process_step(tab_id, json, 0, band_index, source_folder, target, process_step);
                 }
             });
         };
 
-        var process_step = function(tab_id, steps, current_step, source_folder, target_folder, callback) {
+        var process_step = function(tab_id, steps, current_step, band_index, source_folder, target_folder, callback) {
             steps[current_step].source_path = source_folder;
             steps[current_step].output_path = target_folder;
+            steps[current_step].band = band_index;
             $.ajax({
-                url: 'http://127.0.0.1:5005/process/' + CONFIG.data_provider + '/',
+                url: CONFIG.url_process + CONFIG.data_provider + '/',
                 type: 'POST',
                 dataType: 'json',
                 data: JSON.stringify(steps[current_step]),
@@ -620,8 +629,14 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         json = $.parseJSON(response);
                     for (var i = 0 ; i < json.length ; i++)
                         $('#result_list_' + tab_id).append('<li>' + json[i] + '</li>');
-                    if (parseInt(1 + current_step) < steps.length)
-                        callback(tab_id, steps, parseInt(1+current_step), json, target_folder, callback);
+                    if (parseInt(1 + current_step) < steps.length) {
+                        callback(tab_id, steps, parseInt(1 + current_step), band_index, json, target_folder, callback);
+                    } else {
+                        var s = '<li><a target="_blank" href="http://127.0.0.1:5005/distribution/downloadraster/' + json[json.length - 1].split('/').join(':') + '">';
+                        s += 'Click to open: ' + json[json.length - 1];
+                        s += '</a></li>';
+                        $('#result_list_' + tab_id).append(s);
+                    }
                 }
             });
         };
