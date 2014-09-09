@@ -6,16 +6,16 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
         var CONFIG = {
             lang:                                   'en',
-            url_data_providers:                     'http://127.0.0.1:5005/schema/sources/',
-            url_download:                           'http://127.0.0.1:5005/download/',
-            url_bulk_progress:                      'http://127.0.0.1:5005/download/bulk/progress/',
-            url_bulk_download:                      'http://127.0.0.1:5005/download/bulk/trmm2/',
-            url_processing:                         'http://127.0.0.1:5005/download/process/',
-            url_gaul_2_modis:                       'http://127.0.0.1:5005/browse/modis/countries/',
-            url_progress:                           'http://127.0.0.1:5005/download/progress/',
-            url_process:                            'http://127.0.0.1:5005/process/',
-            url_publish:                            'http://127.0.0.1:5005/process/publish/',
-            url_process_list:                       'http://127.0.0.1:5005/process/list/',
+            url_data_providers:                     'http://168.202.28.57:5005/schema/sources/',
+            url_download:                           'http://168.202.28.57:5005/download/',
+            url_bulk_progress:                      'http://168.202.28.57:5005/download/bulk/progress/',
+            url_bulk_download:                      'http://168.202.28.57:5005/download/bulk/trmm2/',
+            url_processing:                         'http://168.202.28.57:5005/download/process/',
+            url_gaul_2_modis:                       'http://168.202.28.57:5005/browse/modis/countries/',
+            url_progress:                           'http://168.202.28.57:5005/download/progress/',
+            url_process:                            'http://168.202.28.57:5005/process/',
+            url_publish:                            'http://168.202.28.57:5005/process/publish/',
+            url_process_list:                       'http://168.202.28.57:5005/process/list/',
             id_placeholder:                         'main_content_placeholder',
             id_data_providers_placeholder:          'data_providers_placeholder',
             id_data_providers_template:             'data_providers_template',
@@ -33,7 +33,21 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
             source_paths:                           {},
             data_provider:                          null,
             data_provider_filename:                 null,
-            data_provider_config:                   null
+            data_provider_config:                   null,
+            days_of_the_month: {
+                '01': 31,
+                '02': 28,
+                '03': 31,
+                '04': 30,
+                '05': 31,
+                '06': 30,
+                '07': 31,
+                '08': 31,
+                '09': 30,
+                '10': 31,
+                '11': 31,
+                '12': 31
+            }
         };
 
         var init = function(config) {
@@ -383,50 +397,72 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     data.file_paths_and_sizes = json;
                     data.tab_id = 'tab_' + tab_index;
 
-                    for (var key in CONFIG.data_provider_config.services.download.payload) {
-                        if (key.indexOf('__') < 0) {
-                            var obj = CONFIG.data_provider_config.services.download.payload[key];
-                            switch (obj.type) {
-                                case 'object':
-                                    data[key] = {};
-                                    for (var i = 0; i < obj.parameters.length; i++) {
-                                        var n = obj.parameters[i].parameter_name;
-                                        var v = obj.parameters[i].parameter_value;
-                                        if (v.indexOf('$') > -1) {
-                                            switch (v) {
-                                                case '$create_day_of_the_year':
-                                                    data[key][n] = create_day_of_the_year(date);
-                                                    break;
-                                                case '$create_day':
-                                                    data[key][n] = $create_day(date);
-                                                    break;
+                    try {
+                        for (var key in CONFIG.data_provider_config.services.download.payload) {
+                            if (key.indexOf('__') < 0) {
+                                var obj = CONFIG.data_provider_config.services.download.payload[key];
+                                switch (obj.type) {
+                                    case 'object':
+                                        data[key] = {};
+                                        for (var i = 0; i < obj.parameters.length; i++) {
+                                            var n = obj.parameters[i].parameter_name;
+                                            var v = obj.parameters[i].parameter_value;
+                                            if (v.indexOf('$') > -1) {
+                                                switch (v) {
+                                                    case '$create_day_of_the_year':
+                                                        data[key][n] = create_day_of_the_year(date);
+                                                        break;
+                                                    case '$create_day':
+                                                        data[key][n] = $create_day(date);
+                                                        break;
+                                                }
+                                            } else {
+                                                data[key][n] = $('#' + v).val()
                                             }
-                                        } else {
-                                            data[key][n] = $('#' + v).val()
                                         }
-                                    }
-                                    break;
+                                        break;
+                                }
                             }
                         }
+                    } catch(e) {
+                        console.log(e);
+                        console.log('fix TRMM here');
                     }
 
                     switch (CONFIG.data_provider) {
 
                         case 'trmm2':
+
+                            data.aggregation = 'sum'
                             data.bulk_download_objects = [];
-                            var file_list = [];
-                            for (var z = 0 ; z < json.length ; z++)
-                                file_list.push(json[z].file_name)
-                            var ftp_data_dir = CONFIG.data_provider_config.ftp.data_dir;
-                            ftp_data_dir += $('#list_years').val() + '/';
-                            ftp_data_dir += $('#list_months').val() + '/';
-                            ftp_data_dir += create_day(date) + '/';
-                            data.bulk_download_objects.push({
-                                'ftp_base_url': CONFIG.data_provider_config.ftp.base_url,
-                                'ftp_data_dir': ftp_data_dir,
-                                'file_list': file_list
-                            });
-                            break;
+
+                            for (var day = 1 ; day <= CONFIG.days_of_the_month[$('#list_months').val()] ; day++) {
+
+                                var day_str = day < 10 ? '0' + day : day.toString();
+
+                                var file_list = [];
+                                for (var z = 0; z < json.length; z++)
+                                    if (json[z].file_name.indexOf($('#list_years').val() + $('#list_months').val() + day_str + '.') > -1)
+                                        file_list.push(json[z].file_name);
+
+                                var ftp_data_dir = CONFIG.data_provider_config.ftp.data_dir;
+                                ftp_data_dir += $('#list_years').val() + '/';
+                                ftp_data_dir += $('#list_months').val() + '/';
+                                ftp_data_dir += day_str + '/';
+                                data.bulk_download_objects.push({
+                                    'ftp_base_url': CONFIG.data_provider_config.ftp.base_url,
+                                    'ftp_data_dir': ftp_data_dir,
+                                    'file_list': file_list,
+                                    'filesystem_structure': {
+                                        'product': '3B42',
+                                        'year': $('#list_years').val(),
+                                        'month': $('#list_months').val(),
+                                        'day': day_str
+                                    }
+                                });
+//                                break;
+
+                            }
 
                     }
 
@@ -451,7 +487,14 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         success: function (response) {
                             $('#download_tab a[href="#tab_0"]').tab('show');
                             CONFIG.source_paths['tab_' + tab_index] = response.source_path;
-                            progress(json, 'tab_' + tab_index, response);
+                            switch (CONFIG.data_provider) {
+                                case 'modis':
+                                    progress(json, 'tab_' + tab_index, response);
+                                    break;
+                                case 'trmm2':
+                                    progress(json, 'tab_' + tab_index, response);
+                                    break;
+                            }
                         }
                     });
 
@@ -636,21 +679,19 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     } else {
                         var s = '<li>';
                         s += '<b>Layer band "' + band_label + '" successfully downloaded an processed. (';
-                        s += '<a target="_blank" href="http://127.0.0.1:5005/distribution/downloadraster/';
+                        s += '<a target="_blank" href="http://168.202.28.57:5005/distribution/downloadraster/';
                         s += json[json.length - 1].split('/').join(':');
                         s += '">';
                         s += 'open';
                         s += ')</b></a></li>';
                         $('#result_list_' + tab_id).append(s);
-                        console.log(json);
-                        console.log('start publishing');
                         $.ajax({
                             url: CONFIG.url_publish + 'fnx_' + parseInt(1000000 * Math.random()).toString() + '/' + json[json.length - 1].split('/').join(':') + '/',
                             type: 'POST',
                             dataType: 'json',
                             contentType: 'application/json',
                             success: function (response) {
-                                console.log(response);
+
                             }
                         });
                     }
