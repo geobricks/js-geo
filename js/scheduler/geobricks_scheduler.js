@@ -672,8 +672,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     var json = response;
                     if (typeof json == 'string')
                         json = $.parseJSON(response);
-                    for (var i = 0 ; i < json.length ; i++)
-                        $('#result_list_' + tab_id).append('<li>Step result: ' + json[i] + '</li>');
+//                    for (var i = 0 ; i < json.length ; i++)
+//                        $('#result_list_' + tab_id).append('<li>Step result: ' + json[i] + '</li>');
                     if (parseInt(1 + current_step) < steps.length) {
                         callback(tab_id, steps, parseInt(1 + current_step), band_index, band_label, json, target_folder, callback);
                     } else {
@@ -685,13 +685,48 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         s += 'open';
                         s += ')</b></a></li>';
                         $('#result_list_' + tab_id).append(s);
+                        var uid = 'fnx_' + parseInt(1000000 * Math.random()).toString();
+                        var style = 'ndvi';
+                        var map_box_title = 'NDVI';
+                        if (json[json.length - 1].indexOf('_EVI') > -1) {
+                            map_box_title = 'EVI';
+                            style = 'evi';
+                        }
                         $.ajax({
-                            url: CONFIG.url_publish + 'fnx_' + parseInt(1000000 * Math.random()).toString() + '/' + json[json.length - 1].split('/').join(':') + '/',
+                            url: CONFIG.url_publish + uid + '/' + style + '/' + json[json.length - 1].split('/').join(':') + '/',
                             type: 'POST',
                             dataType: 'json',
                             contentType: 'application/json',
                             success: function (response) {
-
+                                var map_container = '';
+                                map_container += '<div class="row">';
+                                map_container += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">';
+                                map_container += '<h2>' + map_box_title + '</h2>';
+                                map_container += '</div>';
+                                map_container += '</div>';
+                                map_container += '<div class="row">';
+                                map_container += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">';
+                                map_container += '<div style="height: 300px;" id="' + uid + '"></div>';
+                                map_container += '</div>';
+                                map_container += '</div>';
+                                $('#result_list_' + tab_id).append('<br>');
+                                $('#result_list_' + tab_id).append(map_container);
+                                console.log(uid);
+                                console.log(json[json.length - 1]);
+                                var map = L.map(uid).setView([0, 0], 1);
+                                map.attributionControl.setPrefix("");
+                                map.attributionControl.addAttribution("FAO ESS 2014");
+                                L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                                var wmsFootprint = new L.tileLayer.wms("http://168.202.28.57:9090/geoserver/wms", {
+                                    layers: uid,
+                                    format: 'image/png',
+                                    transparent: true
+                                }).addTo(map);
+                                var wmsFootprint = new L.tileLayer.wms("http://fenixapps2.fao.org/geoserver-demo/wms", {
+                                    layers: 'fenix:gaul0_line_3857',
+                                    format: 'image/png',
+                                    transparent: true
+                                }).addTo(map);
                             }
                         });
                     }
