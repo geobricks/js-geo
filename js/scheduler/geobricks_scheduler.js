@@ -345,6 +345,8 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
         var init_tab = function(tab_index, date) {
 
+            var path = CONFIG.data_provider_config.services.layers.path;
+
             /* Fill parameters with values from the drop-downs. */
             if (CONFIG.data_provider_config.services.layers.parameters.length > 0) {
                 for (var i = 0 ; i < CONFIG.data_provider_config.services.layers.parameters.length ; i++) {
@@ -362,12 +364,12 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             }
                         }
                     }
-                    CONFIG.data_provider_config.services.layers.path = CONFIG.data_provider_config.services.layers.path.replace(p, v);
+                    path = path.replace(p, v);
                 }
             }
 
             /* Build URL. */
-            var url = CONFIG.data_provider_config.base_url + CONFIG.data_provider_config.services.layers.path + '/';
+            var url = CONFIG.data_provider_config.base_url + path + '/';
 
             /* Build countries list, comma separated. */
             if (CONFIG.data_provider_config.services.countries != null) {
