@@ -490,10 +490,10 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                             $('#download_tab a[href="#tab_0"]').tab('show');
                             CONFIG.source_paths['tab_' + tab_index] = response.source_path;
                             switch (CONFIG.data_provider) {
-                                case 'modis':
+                                case 'MODIS':
                                     progress(json, 'tab_' + tab_index, response);
                                     break;
-                                case 'trmm2':
+                                case 'TRMM':
                                     progress(json, 'tab_' + tab_index, response);
                                     break;
                             }
@@ -523,7 +523,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
         var progress = function(json, tab_id, target_folder) {
             clean_progress_tab(tab_id);
             switch (CONFIG.data_provider) {
-                case 'modis':
+                case 'MODIS':
                     for (var i = 0; i < json.length; i++) {
                         var view = {
                             label: (1 + i) + ') ' + json[i]['label'],
@@ -537,7 +537,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                     }
                     $('#' + tab_id).append('<div id="' + tab_id + '_processing_result"><b>Processing Result</b><br><ul id="result_list_' + tab_id + '"></ul></div>');
                     break;
-                case 'trmm2':
+                case 'TRMM':
                     var view = {
                         label: 'Label',
                         id: tab_id + '_progress',
@@ -553,7 +553,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
 
         var init_progress = function(filename, tab_id, target_folder) {
             switch (CONFIG.data_provider) {
-                case 'modis':
+                case 'MODIS':
                     if (CONFIG.timers_map[tab_id] == null)
                         CONFIG.timers_map[tab_id] = {};
                     CONFIG.timers_map[tab_id][filename] = setInterval(function (id) {
@@ -585,7 +585,7 @@ define(['jquery', 'mustache', 'text!../../html/templates.html', 'bootstrap', 'ch
                         });
                     }, 1000, filename);
                     break;
-                case 'trmm2':
+                case 'TRMM':
                     CONFIG.timers_map[tab_id] = setInterval(function (id) {
                         $.ajax({
                             url: CONFIG.url_bulk_progress + tab_id + '/',
